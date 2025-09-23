@@ -4,7 +4,7 @@
 // Base entities
 export type { AllergenDto, AllergenName } from "./Allergen";
 export type { CategoryDto, CategoryName } from "./Category";
-export type { IngredientDto } from "./Ingredient";
+export type { IngredientDto, IngredientQuantityState } from "./Ingredient";
 
 // Dish entities
 export type { DishDto, DishItemDto } from "./Dish";
