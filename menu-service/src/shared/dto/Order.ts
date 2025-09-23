@@ -1,5 +1,4 @@
 import { DishDto } from "./Dish";
-import { IngredientDto } from "./Ingredient";
 
 export type OrderStatus = "OPEN" | "PAID" | "READY" | "CLOSED";
 
@@ -8,7 +7,6 @@ export interface OrderItemDto {
   dish: DishDto;
   quantity: number;
   price: number;
-  extra_list: IngredientDto[];
 }
 
 export interface OrderDto {
@@ -17,4 +15,5 @@ export interface OrderDto {
   items: OrderItemDto[];
   openedAt: string; // date-time format
   closedAt?: string | null; // date-time format
+  customerCount: number;
 }
