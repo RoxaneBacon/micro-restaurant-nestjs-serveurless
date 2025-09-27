@@ -7,7 +7,7 @@ export type { CategoryDto, CategoryName } from "./Category";
 export type { IngredientDto, IngredientQuantityState } from "./Ingredient";
 
 // Dish entities
-export type { DishDto, DishItemDto } from "./Dish";
+export type { DishDto, DishItemDto, IngredientQuantityState } from "./Dish";
 
 // Order entities
 export type { OrderDto, OrderItemDto, OrderStatus } from "./Order";
