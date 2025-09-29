@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  kitchen-service:
+    image: "nestjs-restaurant/bff-service"
+    restart: always
+    ports:
+      - 9400:3001
+    networks:
+      - nestjs-restaurant-network
+networks:
+  nestjs-restaurant-network:
+    driver: bridge
