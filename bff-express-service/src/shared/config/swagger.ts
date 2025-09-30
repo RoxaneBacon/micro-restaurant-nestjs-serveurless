@@ -1,6 +1,11 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const apiPath = process.env.SWAGGER_PATH;
 
 export function setupSwagger(app: Express): void {
     const options: swaggerJsdoc.Options = {
@@ -12,11 +17,9 @@ export function setupSwagger(app: Express): void {
                 description: "API documentation for Menu and Order services",
             },
         },
-        // 👇 Paths to files where you’ll write Swagger JSDoc comments
         apis: ["./src/**/*.ts"],
     };
 
     const swaggerSpec = swaggerJsdoc(options);
-
-    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.use(apiPath!, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }

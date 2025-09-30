@@ -1,16 +1,16 @@
 version: "3"
 
 services:
-  menu-service:
+  bff-service:
     image: "nestjs-restaurant/bff-express-service"
     restart: always
     ports:
-      - "9400:3001"
+      - "9400:9400"
     depends_on:
-      - mongo_db_menu
+      - mongo_db_bff
     networks:
       - nestjs-restaurant-network
-  mongo_db_menu:
+  mongo_db_bff:
     image: "mongo:4.4.15"
     restart: always
     ports:
