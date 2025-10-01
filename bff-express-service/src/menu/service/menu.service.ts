@@ -20,8 +20,10 @@ class MenuService {
      */
     private transformDish(dish: any): DishDto {
         // Get the dish dto that is inside dish.fullName and replace the id inside dish.fullName by the id outside
-        return {...JSON.parse(dish.fullName), _id: dish._id} as DishDto;
-    }
+        console.log(`[MenuService] Transforming dish with id: ${dish._id}`);
+        const transformedDish = {...JSON.parse(dish.fullName), _id: dish._id} as DishDto;
+        console.log(`[MenuService] Dish transformed successfully: ${JSON.stringify(transformedDish)}`);
+        return transformedDish;    }
 
     /**
      * Fetches all dishes from the menu API
@@ -29,12 +31,15 @@ class MenuService {
      * @throws Error if the API request fails
      */
     async getMenu(): Promise<DishDto[]> {
-        console.log(`Fetching menu from ${API_BASE}/menus`);
+        console.log(`[MenuService] Fetching all menu items from ${API_BASE}/menus`);
         const response = await axios.get(`${API_BASE}/menus`);
         if (response.status !== 200) {
+            console.error(`[MenuService] Failed to fetch menu items. Status: ${response.status}`);
             throw new Error("Failed to fetch dishes");
         }
-        return response.data.map((dish: any) => this.transformDish(dish));
+        const dishes = response.data.map((dish: any) => this.transformDish(dish));
+        console.log(`[MenuService] Successfully fetched ${dishes.length} menu items`);
+        return dishes;
     }
 
     /**
@@ -44,18 +49,24 @@ class MenuService {
      * @throws Error if the dish is not found or the API request fails
      */
     async getItemById(id: string): Promise<DishDto | undefined> {
+        console.log(`[MenuService] Fetching menu item with id: ${id}`);
         const response = await axios.get(`${API_BASE}/menus/${id}`);
         if (response.status !== 200) {
+            console.error(`[MenuService] Dish with id ${id} not found`);
             throw new Error(`Dish with id ${id} not found`);
         }
-        return this.transformDish(response.data);
+        const dish = this.transformDish(response.data);
+        console.log(`[MenuService] Successfully fetched dish: ${JSON.stringify(dish)}`);
+        return dish;
     }
 
     getCategories() {
+        console.log('[MenuService] Fetching categories');
         return categories;
     }
 
     getAllergens() {
+        console.log('[MenuService] Fetching allergens');
         return allergens;
     }
 }
