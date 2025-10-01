@@ -29,8 +29,9 @@ router.get("/", (req: Request, res: Response) => {
     console.log('[MenuController] GET / - Fetching all menu items');
     const dishDtos = MenuService.getMenu();
     dishDtos.then((dishDtos: DishDto[]) => {
+        const categories = MenuService.getCategories();
         console.log(`[MenuController] Successfully retrieved ${categories.length} categories`);
-        res.json(dishDtos);
+        res.json(categories);
     })
 });
 
