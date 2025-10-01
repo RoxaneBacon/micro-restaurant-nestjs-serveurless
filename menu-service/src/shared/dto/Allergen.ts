@@ -4,4 +4,5 @@ export interface AllergenDto {
   _id: string;
   name: AllergenName;
   color: string;
+  displayName: string;
 }
