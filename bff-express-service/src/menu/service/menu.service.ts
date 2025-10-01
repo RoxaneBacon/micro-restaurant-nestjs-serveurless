@@ -2,10 +2,13 @@ import {DishDto} from "../dto/dish.dto";
 import {categories} from "../../shared/service/categories.mocks";
 import {allergens} from "../../shared/service/allergens.mocks";
 import dotenv from "dotenv";
+import axios from "axios";
 
 dotenv.config();
 
 const API_BASE = process.env.GATEWAY_SERVICE_URL! + process.env.GATEWAY_MENU_SERVICE_URL;
+
+// TODO: Ajouter logs
 
 class MenuService {
 
@@ -27,12 +30,11 @@ class MenuService {
      */
     async getMenu(): Promise<DishDto[]> {
         console.log(`Fetching menu from ${API_BASE}/menus`);
-        const response = await fetch(`${API_BASE}/menus`);
-        if (!response.ok) {
+        const response = await axios.get(`${API_BASE}/menus`);
+        if (response.status !== 200) {
             throw new Error("Failed to fetch dishes");
         }
-        const data = await response.json();
-        return data.map((dish: any) => this.transformDish(dish));
+        return response.data.map((dish: any) => this.transformDish(dish));
     }
 
     /**
@@ -42,12 +44,11 @@ class MenuService {
      * @throws Error if the dish is not found or the API request fails
      */
     async getItemById(id: string): Promise<DishDto | undefined> {
-        const response = await fetch(`${API_BASE}/menus/${id}`);
-        if (!response.ok) {
+        const response = await axios.get(`${API_BASE}/menus/${id}`);
+        if (response.status !== 200) {
             throw new Error(`Dish with id ${id} not found`);
         }
-        const data = await response.json();
-        return this.transformDish(data);
+        return this.transformDish(response.data);
     }
 
     getCategories() {
