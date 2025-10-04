@@ -65,14 +65,17 @@ describe('TableOrdersController (e2e)', () => {
     {
       _id: 'menu item id 1',
       shortName: 'menu item shortname 1',
+      quantity: 'base',
     },
     {
       _id: 'menu item id 2',
       shortName: 'menu item shortname 2',
+      quantity: 'base',
     },
     {
       _id: 'menu item id 3',
       shortName: 'menu item shortname 3',
+      quantity: 'base',
     },
   ];
 
@@ -102,14 +105,18 @@ describe('TableOrdersController (e2e)', () => {
     },
   ];
 
-  const buildMockTableOrder = (opened = null, lines = [], preparations = [], billed = null) => ({
+  const buildMockTableOrder = (
+    opened = null,
+    lines = [],
+    preparations = [],
+    billed = null,
+  ) => ({
     ...mockTableOrder,
     opened: opened ? opened.toDateString() : null,
     lines,
     preparations,
     billed: billed ? billed.toDateString() : null,
   });
-
 
   const mockPreparedItems = [
     {
@@ -123,34 +130,41 @@ describe('TableOrdersController (e2e)', () => {
     {
       _id: 'prepared item 3',
       shortName: 'menu item shortname',
-    }
+    },
   ];
 
   const mockPreparations = [
     {
       _id: 'preparation id 1',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[0]],
     },
     {
       _id: 'preparation id 2',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[1]],
     },
     {
       _id: 'preparation id 3',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[2]],
-    }
+    },
   ];
 
   const tableOrdersService = {
     findAll: () => mockTableOrdersList,
     findOne: () => mockTableOrdersList[0],
-    startOrdering: () => (buildMockTableOrder(new Date())),
-    addOrderingLineToTableOrder: () => (buildMockTableOrder(new Date(), mockOrderingLineList)),
-    sendItemsForPreparation: () => (mockPreparations),
-    billOrder: () => (buildMockTableOrder(new Date(), mockOrderingLineList, mockPreparations, new Date())),
+    startOrdering: () => buildMockTableOrder(new Date()),
+    addOrderingLineToTableOrder: () =>
+      buildMockTableOrder(new Date(), mockOrderingLineList),
+    sendItemsForPreparation: () => mockPreparations,
+    billOrder: () =>
+      buildMockTableOrder(
+        new Date(),
+        mockOrderingLineList,
+        mockPreparations,
+        new Date(),
+      ),
   };
 
   beforeAll(async () => {

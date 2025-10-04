@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IngredientQuantityState } from '../../shared/dto/ingredient-quantity-state.dto';
 
 export class OrderingItem {
   @ApiProperty()
@@ -7,8 +8,12 @@ export class OrderingItem {
   @ApiProperty()
   shortName: string;
 
+  @ApiProperty()
+  quantity: IngredientQuantityState;
+
   constructor(anyObject: any = {}) {
     this._id = anyObject._id || null;
     this.shortName = anyObject.shortName || null;
+    this.quantity = anyObject.quantity || 'base';
   }
 }
