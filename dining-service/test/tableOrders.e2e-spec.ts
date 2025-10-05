@@ -17,6 +17,8 @@ import { TablesModule } from '../src/tables/tables.module';
 import { TableOrdersService } from '../src/table-orders/services/table-orders.service';
 import { PreparedItemDto } from '../src/table-orders/dto/prepared-item.dto';
 import { PreparationDto } from '../src/table-orders/dto/preparation.dto';
+import { OrderingItem } from '../src/table-orders/schemas/ordering-item.schema';
+import { OrderingLine } from '../src/table-orders/schemas/ordering-line.schema';
 
 describe('TableOrdersController (e2e)', () => {
   let app: INestApplication;
@@ -61,22 +63,25 @@ describe('TableOrdersController (e2e)', () => {
     billed: null,
   };
 
-  const mockOrderingItemList = [
+  const mockOrderingItemList: OrderingItem[] = [
     {
       _id: 'menu item id 1',
       shortName: 'menu item shortname 1',
+      ingredients: [],
     },
     {
       _id: 'menu item id 2',
       shortName: 'menu item shortname 2',
+      ingredients: [],
     },
     {
       _id: 'menu item id 3',
       shortName: 'menu item shortname 3',
+      ingredients: [],
     },
   ];
 
-  const mockOrderingLineList = [
+  const mockOrderingLineList: OrderingLine[] = [
     {
       item: mockOrderingItemList[0],
       howMany: 1,
@@ -89,27 +94,18 @@ describe('TableOrdersController (e2e)', () => {
     },
   ];
 
-  const mockOrderingLineSentForPrepationList = [
-    {
-      item: mockOrderingItemList[0],
-      howMany: 1,
-      sentForPreparation: true,
-    },
-    {
-      item: mockOrderingItemList[1],
-      howMany: 2,
-      sentForPreparation: true,
-    },
-  ];
-
-  const buildMockTableOrder = (opened = null, lines = [], preparations = [], billed = null) => ({
+  const buildMockTableOrder = (
+    opened = null,
+    lines = [],
+    preparations = [],
+    billed = null,
+  ) => ({
     ...mockTableOrder,
     opened: opened ? opened.toDateString() : null,
     lines,
     preparations,
     billed: billed ? billed.toDateString() : null,
   });
-
 
   const mockPreparedItems = [
     {
@@ -123,34 +119,41 @@ describe('TableOrdersController (e2e)', () => {
     {
       _id: 'prepared item 3',
       shortName: 'menu item shortname',
-    }
+    },
   ];
 
   const mockPreparations = [
     {
       _id: 'preparation id 1',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[0]],
     },
     {
       _id: 'preparation id 2',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[1]],
     },
     {
       _id: 'preparation id 3',
-      shouldBeReadyAt: (new Date()).toISOString(),
+      shouldBeReadyAt: new Date().toISOString(),
       preparedItems: [mockPreparedItems[2]],
-    }
+    },
   ];
 
   const tableOrdersService = {
     findAll: () => mockTableOrdersList,
     findOne: () => mockTableOrdersList[0],
-    startOrdering: () => (buildMockTableOrder(new Date())),
-    addOrderingLineToTableOrder: () => (buildMockTableOrder(new Date(), mockOrderingLineList)),
-    sendItemsForPreparation: () => (mockPreparations),
-    billOrder: () => (buildMockTableOrder(new Date(), mockOrderingLineList, mockPreparations, new Date())),
+    startOrdering: () => buildMockTableOrder(new Date()),
+    addOrderingLineToTableOrder: () =>
+      buildMockTableOrder(new Date(), mockOrderingLineList),
+    sendItemsForPreparation: () => mockPreparations,
+    billOrder: () =>
+      buildMockTableOrder(
+        new Date(),
+        mockOrderingLineList,
+        mockPreparations,
+        new Date(),
+      ),
   };
 
   beforeAll(async () => {
