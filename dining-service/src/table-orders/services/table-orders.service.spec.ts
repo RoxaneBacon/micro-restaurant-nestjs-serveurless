@@ -36,7 +36,6 @@ describe('TableOrdersService', () => {
   let mockOrderingLineList: OrderingLine[];
   let mockOrderingLineSentForPrepationList: OrderingLine[];
   let buildMockTableOrder: Function;
-  let mockGetTableOrderParams: GetTableOrderParams;
   let startOrderingDto: StartOrderingDto;
   let addMenuItemDto: AddMenuItemDto;
   let mockPreparedItems: PreparedItemDto[];
@@ -91,17 +90,17 @@ describe('TableOrdersService', () => {
       {
         _id: 'menu item id 1',
         shortName: 'menu item shortname 1',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'menu item id 2',
         shortName: 'menu item shortname 2',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'menu item id 3',
         shortName: 'menu item shortname 3',
-        quantity: 'base',
+        ingredients: [],
       },
     ];
 
@@ -144,10 +143,6 @@ describe('TableOrdersService', () => {
       billed,
     });
 
-    mockGetTableOrderParams = {
-      tableOrderId: mockTableOrder._id,
-    };
-
     startOrderingDto = {
       tableNumber: 12,
       customersCount: 42,
@@ -157,6 +152,7 @@ describe('TableOrdersService', () => {
       menuItemId: mockOrderingItemList[0]._id,
       menuItemShortName: mockOrderingItemList[0].shortName,
       howMany: 42,
+      ingredients: [],
     };
 
     mockTableList = [
@@ -192,17 +188,17 @@ describe('TableOrdersService', () => {
       {
         _id: 'prepared item 1',
         shortName: 'menu item shortname',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'prepared item 2',
         shortName: 'menu item shortname',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'prepared item 3',
         shortName: 'menu item shortname',
-        quantity: 'base',
+        ingredients: [],
       },
     ];
 

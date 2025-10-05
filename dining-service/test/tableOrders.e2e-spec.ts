@@ -15,8 +15,7 @@ import { TableOrdersModule } from '../src/table-orders/table-orders.module';
 import { TablesModule } from '../src/tables/tables.module';
 
 import { TableOrdersService } from '../src/table-orders/services/table-orders.service';
-import { PreparedItemDto } from '../src/table-orders/dto/prepared-item.dto';
-import { PreparationDto } from '../src/table-orders/dto/preparation.dto';
+import { OrderingItem } from '../src/table-orders/schemas/ordering-item.schema';
 
 describe('TableOrdersController (e2e)', () => {
   let app: INestApplication;
@@ -61,21 +60,21 @@ describe('TableOrdersController (e2e)', () => {
     billed: null,
   };
 
-  const mockOrderingItemList = [
+  const mockOrderingItemList: OrderingItem[] = [
     {
       _id: 'menu item id 1',
       shortName: 'menu item shortname 1',
-      quantity: 'base',
+      ingredients: [],
     },
     {
       _id: 'menu item id 2',
       shortName: 'menu item shortname 2',
-      quantity: 'base',
+      ingredients: [],
     },
     {
       _id: 'menu item id 3',
       shortName: 'menu item shortname 3',
-      quantity: 'base',
+      ingredients: [],
     },
   ];
 
@@ -89,19 +88,6 @@ describe('TableOrdersController (e2e)', () => {
       item: mockOrderingItemList[1],
       howMany: 2,
       sentForPreparation: false,
-    },
-  ];
-
-  const mockOrderingLineSentForPrepationList = [
-    {
-      item: mockOrderingItemList[0],
-      howMany: 1,
-      sentForPreparation: true,
-    },
-    {
-      item: mockOrderingItemList[1],
-      howMany: 2,
-      sentForPreparation: true,
     },
   ];
 

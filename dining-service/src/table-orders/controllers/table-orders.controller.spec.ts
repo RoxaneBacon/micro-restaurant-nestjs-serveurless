@@ -73,17 +73,17 @@ describe('TableOrdersController', () => {
       {
         _id: 'menu item id 1',
         shortName: 'menu item shortname 1',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'menu item id 2',
         shortName: 'menu item shortname 2',
-        quantity: 'base',
+        ingredients: [],
       },
       {
         _id: 'menu item id 3',
         shortName: 'menu item shortname 3',
-        quantity: 'base',
+        ingredients: [],
       },
     ];
 
@@ -126,20 +126,24 @@ describe('TableOrdersController', () => {
       menuItemId: 'menu item id',
       menuItemShortName: 'menu item shortname',
       howMany: 42,
+      ingredients: [],
     };
 
     mockPreparedItems = [
       {
         _id: 'prepared item 1',
         shortName: 'menu item shortname',
+        ingredients: [],
       },
       {
         _id: 'prepared item 2',
         shortName: 'menu item shortname',
+        ingredients: [],
       },
       {
         _id: 'prepared item 3',
         shortName: 'menu item shortname',
+        ingredients: [],
       },
     ];
 

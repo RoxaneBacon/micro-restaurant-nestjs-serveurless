@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IngredientQuantityState } from '../../shared/dto/ingredient-quantity-state.dto';
+import { DishItemDto } from '../dto/dish.dto';
 
 export class OrderingItem {
   @ApiProperty()
@@ -9,11 +9,11 @@ export class OrderingItem {
   shortName: string;
 
   @ApiProperty()
-  quantity: IngredientQuantityState;
+  ingredients: DishItemDto[];
 
   constructor(anyObject: any = {}) {
     this._id = anyObject._id || null;
     this.shortName = anyObject.shortName || null;
-    this.quantity = anyObject.quantity || 'base';
+    this.ingredients = anyObject.ingredients || [];
   }
 }

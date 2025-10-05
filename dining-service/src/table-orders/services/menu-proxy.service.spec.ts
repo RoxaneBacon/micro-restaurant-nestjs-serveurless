@@ -69,7 +69,7 @@ describe('MenuProxyService', () => {
     mockOrderingItem = {
       _id: mockMenuItem._id,
       shortName: mockMenuItem.shortName,
-      quantity: 'base',
+      ingredients: [],
     };
 
     const module: TestingModule = await Test.createTestingModule({

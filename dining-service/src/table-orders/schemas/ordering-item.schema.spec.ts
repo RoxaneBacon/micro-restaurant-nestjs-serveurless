@@ -6,7 +6,7 @@ describe('OrderingItem', () => {
     const emptyOrderingItem: OrderingItem = {
       _id: null,
       shortName: null,
-      quantity: 'base',
+      ingredients: [],
     };
 
     expect(new OrderingItem()).toEqual(emptyOrderingItem);
@@ -15,13 +15,13 @@ describe('OrderingItem', () => {
     const anObject = {
       _id: 'item id',
       shortName: 'item shortName',
-      quantity: 'base',
+      ingredients: [],
       anotherProp: 'anotherValue',
     };
     const anObjectOrderingItem: OrderingItem = {
       _id: 'item id',
       shortName: 'item shortName',
-      quantity: 'base',
+      ingredients: [],
     };
     expect(new OrderingItem(anObject)).toEqual(anObjectOrderingItem);
   });

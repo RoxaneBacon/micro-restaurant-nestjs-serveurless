@@ -1,6 +1,6 @@
 import { IsMongoId, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IngredientQuantityState } from '../../shared/dto/ingredient-quantity-state.dto';
+import { DishItemDto } from './dish.dto';
 
 export class PreparedItemDto {
   @ApiProperty()
@@ -13,14 +13,15 @@ export class PreparedItemDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  quantity: IngredientQuantityState;
+  ingredients: DishItemDto[];
 
-  static kitchenPreparedItemToPreparedItemDtoFactory(kitchenPreparedItem): PreparedItemDto {
+  static kitchenPreparedItemToPreparedItemDtoFactory(
+    kitchenPreparedItem: PreparedItemDto,
+  ): PreparedItemDto {
     const preparedItem: PreparedItemDto = new PreparedItemDto();
     preparedItem._id = kitchenPreparedItem._id;
     preparedItem.shortName = kitchenPreparedItem.shortName;
-    preparedItem.quantity = kitchenPreparedItem.quantity;
-
+    preparedItem.ingredients = kitchenPreparedItem.ingredients;
     return preparedItem;
   }
 }

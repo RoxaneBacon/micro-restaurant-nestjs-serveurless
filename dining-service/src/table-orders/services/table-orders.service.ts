@@ -116,7 +116,7 @@ export class TableOrdersService {
     tableNumber: number,
     orderingLines: OrderingLine[],
   ): Promise<OrderingLinesWithPreparations> {
-    let orderingLinesToSend: OrderingLine[] = [];
+    const orderingLinesToSend: OrderingLine[] = [];
 
     const newOrderingLines: OrderingLine[] = orderingLines.map(
       (orderingLine) => {

@@ -38,7 +38,7 @@ describe('KitchenProxyService', () => {
     mockOrderingItem = {
       _id: 'menu item id 1',
       shortName: 'menu item shortname 1',
-      quantity: 'base',
+      ingredients: [],
     };
 
     mockOrderingLines = [

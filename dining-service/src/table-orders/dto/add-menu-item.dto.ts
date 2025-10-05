@@ -1,4 +1,5 @@
 import { IsMongoId, IsNotEmpty, IsPositive } from 'class-validator';
+import { DishItemDto } from './dish.dto';
 
 export class AddMenuItemDto {
   @IsMongoId()
@@ -10,4 +11,7 @@ export class AddMenuItemDto {
   @IsNotEmpty()
   @IsPositive()
   howMany: number;
+
+  @IsNotEmpty()
+  ingredients: DishItemDto[];
 }
