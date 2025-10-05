@@ -1,5 +1,6 @@
 import {Router, Request, Response} from "express";
 import OrderService from "../service/order.service";
+import {handlePromiseError} from "../../utils/handlePromiseError";
 
 const router = Router();
 
@@ -29,15 +30,14 @@ const router = Router();
  *         $ref: '#/components/responses/ServerError'
  */
 router.post("/", (req: Request, res: Response) => {
-    console.log('[OrderController] POST / - Creating a new order');
-    const orders = OrderService.createOrder(req.body);
-    orders.then((order) => {
-        console.log(`[OrderController] Successfully created order with id: ${order._id}`);
-        res.status(201).json(order);
-    }).catch((error) => {
-        console.error(`[OrderController] Error creating order: ${error.message}`);
-        res.status(500).json({error: error.message});
-    });
+    console.log("[OrderController] POST / - Creating a new order");
+
+    OrderService.createOrder(req.body)
+        .then(order => {
+            console.log(`[OrderController] Successfully created order with id: ${order._id}`);
+            res.status(201).json(order);
+        })
+        .catch(handlePromiseError(res, "OrderController.createOrder"));
 });
 
 /**
@@ -69,14 +69,13 @@ router.post("/", (req: Request, res: Response) => {
 router.post("/:id/pay", (req: Request, res: Response) => {
     const orderId = req.params.id;
     console.log(`[OrderController] POST /${orderId}/pay - Paying order with id: ${orderId}`);
-    const orders = OrderService.payOrder(orderId);
-    orders.then((order) => {
-        console.log(`[OrderController] Successfully paid order with id: ${order._id}`);
-        res.json(order);
-    }).catch((error) => {
-        console.error(`[OrderController] Error paying order with id ${orderId}: ${error.message}`);
-        res.status(500).json({error: error.message});
-    });
+
+    OrderService.payOrder(orderId)
+        .then(order => {
+            console.log(`[OrderController] Successfully paid order with id: ${order._id}`);
+            res.status(200).json(order);
+        })
+        .catch(handlePromiseError(res, "OrderController.payOrder"));
 });
 
 export default router;
