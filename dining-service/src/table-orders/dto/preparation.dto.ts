@@ -30,10 +30,12 @@ export class PreparationDto {
     preparation._id = kitchenPreparation._id;
     preparation.shouldBeReadyAt = kitchenPreparation.shouldBeReadyAt;
     preparation.preparedItems = kitchenPreparation.preparedItems.map(
-      (preparedItem: PreparedItemDto) =>
-        PreparedItemDto.kitchenPreparedItemToPreparedItemDtoFactory(
+      (preparedItem: PreparedItemDto) => {
+        console.log('preparedItem', preparedItem);
+        return PreparedItemDto.kitchenPreparedItemToPreparedItemDtoFactory(
           preparedItem,
-        ),
+        );
+      },
     );
 
     return preparation;

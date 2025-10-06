@@ -126,7 +126,26 @@ describe('TableOrdersController', () => {
       menuItemId: 'menu item id',
       menuItemShortName: 'menu item shortname',
       howMany: 42,
-      ingredients: [],
+      ingredients: [
+        {
+          _id: 'di1+',
+          ingredient: {
+            _id: 'ing1',
+            name: 'Extra Cheese',
+            extraCost: 2.0,
+          },
+          quantity: 'extra',
+        },
+        {
+          _id: 'di2',
+          ingredient: {
+            _id: 'ing2',
+            name: 'Bacon',
+            extraCost: 3.0,
+          },
+          quantity: 'base',
+        },
+      ],
     };
 
     mockPreparedItems = [
