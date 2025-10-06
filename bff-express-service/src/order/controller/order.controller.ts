@@ -6,11 +6,18 @@ const router = Router();
 
 /**
  * @openapi
- * /order:
+ * /order/{id}:
  *   post:
  *     summary: Create a new order
  *     tags:
  *       - Order
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the table for the order
  *     requestBody:
  *       required: true
  *       content:
@@ -29,10 +36,10 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/", (req: Request, res: Response) => {
-    console.log("[OrderController] POST / - Creating a new order");
+router.post("/:id", (req: Request, res: Response) => {
+    console.log("[OrderController] POST /:id - Creating a new order");
 
-    OrderService.createOrder(req.body)
+    OrderService.createOrder(parseInt(req.params.id), req.body)
         .then(order => {
             console.log(`[OrderController] Successfully created order with id: ${order._id}`);
             res.status(201).json(order);
