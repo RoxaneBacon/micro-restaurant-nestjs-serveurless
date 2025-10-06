@@ -44,7 +44,7 @@ export const dishes: DishDto[] = [
     },
     {
         _id: '2',
-        fullName: 'Spaghetti Bolognese',
+        fullName: 'Spaghetti Bolognaise',
         shortName: 'Bolognese',
         description:
             'Pâtes spaghetti servies avec une sauce bolognaise riche en viande, tomates, oignons et herbes.',
