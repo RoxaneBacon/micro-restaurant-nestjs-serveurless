@@ -104,10 +104,8 @@ export class TableOrdersService {
     }
 
     const orderingLine: OrderingLine = new OrderingLine();
-    console.log('orderingLine', orderingItem);
     orderingLine.item = orderingItem;
     orderingLine.howMany = addMenuItemDto.howMany;
-    console.log('orderingLine', orderingLine);
 
     return this.tableOrderModel.findByIdAndUpdate(
       tableOrder._id,
@@ -154,50 +152,12 @@ export class TableOrdersService {
       throw new TableOrderAlreadyBilledException(tableOrder);
     }
 
-    console.log(
-      'tableOrder before manageOrderingLines',
-      tableOrder.lines.map((line) => {
-        return {
-          ...line,
-          item: {
-            ...line.item,
-            ingredients: line.item.ingredients.map((ingredient) => {
-              return {
-                ...ingredient,
-                _id: ingredient._id.toString(),
-              };
-            }),
-            _id: line.item._id.toString(),
-          },
-        };
-      }),
-    );
-
     const managedLines: OrderingLinesWithPreparations =
       await this.manageOrderingLines(tableOrder.tableNumber, tableOrder.lines);
 
     tableOrder.lines = managedLines.orderingLines;
     tableOrder.preparations = tableOrder.preparations.concat(
       managedLines.preparations,
-    );
-
-    console.log(
-      'tableOrder after manageOrderingLines',
-      tableOrder.lines.map((line) => {
-        return {
-          ...line,
-          item: {
-            ...line.item,
-            ingredients: line.item.ingredients.map((ingredient) => {
-              return {
-                ...ingredient,
-                _id: ingredient._id.toString(),
-              };
-            }),
-            _id: line.item._id.toString(),
-          },
-        };
-      }),
     );
 
     await this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, {

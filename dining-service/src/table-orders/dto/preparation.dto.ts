@@ -31,7 +31,6 @@ export class PreparationDto {
     preparation.shouldBeReadyAt = kitchenPreparation.shouldBeReadyAt;
     preparation.preparedItems = kitchenPreparation.preparedItems.map(
       (preparedItem: PreparedItemDto) => {
-        console.log('preparedItem', preparedItem);
         return PreparedItemDto.kitchenPreparedItemToPreparedItemDtoFactory(
           preparedItem,
         );
