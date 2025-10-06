@@ -1,4 +1,10 @@
-import { ArrayNotEmpty, IsArray, IsDateString, IsMongoId, IsNotEmpty } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsDateString,
+  IsMongoId,
+  IsNotEmpty,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PreparedItemDto } from './prepared-item.dto';
 
@@ -17,11 +23,19 @@ export class PreparationDto {
   @IsArray({ each: true })
   preparedItems: PreparedItemDto[];
 
-  static kitchenPreparationToPreparationDtoFactory(kitchenPreparation): PreparationDto {
+  static kitchenPreparationToPreparationDtoFactory(
+    kitchenPreparation,
+  ): PreparationDto {
     const preparation: PreparationDto = new PreparationDto();
     preparation._id = kitchenPreparation._id;
     preparation.shouldBeReadyAt = kitchenPreparation.shouldBeReadyAt;
-    preparation.preparedItems = kitchenPreparation.preparedItems.map((preparedItem) => PreparedItemDto.kitchenPreparedItemToPreparedItemDtoFactory(preparedItem));
+    preparation.preparedItems = kitchenPreparation.preparedItems.map(
+      (preparedItem: PreparedItemDto) => {
+        return PreparedItemDto.kitchenPreparedItemToPreparedItemDtoFactory(
+          preparedItem,
+        );
+      },
+    );
 
     return preparation;
   }

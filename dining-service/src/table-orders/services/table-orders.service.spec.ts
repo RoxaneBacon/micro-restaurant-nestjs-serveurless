@@ -91,14 +91,17 @@ describe('TableOrdersService', () => {
       {
         _id: 'menu item id 1',
         shortName: 'menu item shortname 1',
+        ingredients: [],
       },
       {
         _id: 'menu item id 2',
         shortName: 'menu item shortname 2',
+        ingredients: [],
       },
       {
         _id: 'menu item id 3',
         shortName: 'menu item shortname 3',
+        ingredients: [],
       },
     ];
 
@@ -128,7 +131,12 @@ describe('TableOrdersService', () => {
       },
     ];
 
-    buildMockTableOrder = (opened = null, lines = [], preparations = [], billed = null) => ({
+    buildMockTableOrder = (
+      opened = null,
+      lines = [],
+      preparations = [],
+      billed = null,
+    ) => ({
       ...mockTableOrder,
       opened,
       lines,
@@ -149,6 +157,7 @@ describe('TableOrdersService', () => {
       menuItemId: mockOrderingItemList[0]._id,
       menuItemShortName: mockOrderingItemList[0].shortName,
       howMany: 42,
+      ingredients: [],
     };
 
     mockTableList = [
@@ -184,33 +193,36 @@ describe('TableOrdersService', () => {
       {
         _id: 'prepared item 1',
         shortName: 'menu item shortname',
+        ingredients: [],
       },
       {
         _id: 'prepared item 2',
         shortName: 'menu item shortname',
+        ingredients: [],
       },
       {
         _id: 'prepared item 3',
         shortName: 'menu item shortname',
-      }
+        ingredients: [],
+      },
     ];
 
     mockPreparations = [
       {
         _id: 'preparation id 1',
-        shouldBeReadyAt: (new Date()).toISOString(),
+        shouldBeReadyAt: new Date().toISOString(),
         preparedItems: [mockPreparedItems[0]],
       },
       {
         _id: 'preparation id 2',
-        shouldBeReadyAt: (new Date()).toISOString(),
+        shouldBeReadyAt: new Date().toISOString(),
         preparedItems: [mockPreparedItems[1]],
       },
       {
         _id: 'preparation id 3',
-        shouldBeReadyAt: (new Date()).toISOString(),
+        shouldBeReadyAt: new Date().toISOString(),
         preparedItems: [mockPreparedItems[2]],
-      }
+      },
     ];
 
     const module: TestingModule = await Test.createTestingModule({
@@ -296,14 +308,14 @@ describe('TableOrdersService', () => {
 
   describe('startOrdering', () => {
     it('should create a new tableOrder', async () => {
-      jest.spyOn(tablesService, 'takeTable').mockImplementationOnce(() =>
-        Promise.resolve(mockTakenTable),
-      );
+      jest
+        .spyOn(tablesService, 'takeTable')
+        .mockImplementationOnce(() => Promise.resolve(mockTakenTable));
       const mockOpened = new Date();
       const mockNewTableOrder = buildMockTableOrder(mockOpened);
-      jest.spyOn(model, 'create').mockImplementationOnce(() =>
-        Promise.resolve(mockNewTableOrder),
-      );
+      jest
+        .spyOn(model, 'create')
+        .mockImplementationOnce(() => Promise.resolve(mockNewTableOrder));
       const newTableOrder = await service.startOrdering(startOrderingDto);
       expect(newTableOrder).toEqual(mockNewTableOrder);
     });
@@ -313,169 +325,257 @@ describe('TableOrdersService', () => {
     it('should add items as new orderingLine to the tableOrder', async () => {
       const mockOpened = new Date();
       const mockOpenedTableOrder = buildMockTableOrder(mockOpened);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
-      );
-      jest.spyOn(menuProxyService, 'findByShortName').mockImplementationOnce(() =>
-        Promise.resolve(mockOrderingItemList[0]),
-      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(menuProxyService, 'findByShortName')
+        .mockImplementationOnce(() => Promise.resolve(mockOrderingItemList[0]));
       const newOrderingLineList = [mockOrderingLineList[0]];
       newOrderingLineList[0].howMany = addMenuItemDto.howMany;
-      const mockOpenedTableOrderWithLines = buildMockTableOrder(mockOpened, newOrderingLineList);
-      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValueOnce(mockOpenedTableOrderWithLines);
+      const mockOpenedTableOrderWithLines = buildMockTableOrder(
+        mockOpened,
+        newOrderingLineList,
+      );
+      jest
+        .spyOn(model, 'findByIdAndUpdate')
+        .mockResolvedValueOnce(mockOpenedTableOrderWithLines);
 
-      const updatedTableOrder = await service.addOrderingLineToTableOrder(mockOpenedTableOrder._id, addMenuItemDto);
+      const updatedTableOrder = await service.addOrderingLineToTableOrder(
+        mockOpenedTableOrder._id,
+        addMenuItemDto,
+      );
       expect(updatedTableOrder).toEqual(mockOpenedTableOrderWithLines);
     });
 
     it('should add items as new orderingLine to the tableOrder if lines are already sent to preparation', async () => {
       const mockOpened = new Date();
-      const mockOpenedTableOrder = buildMockTableOrder(mockOpened, mockOrderingLineSentForPrepationList);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
+      const mockOpenedTableOrder = buildMockTableOrder(
+        mockOpened,
+        mockOrderingLineSentForPrepationList,
       );
-      jest.spyOn(menuProxyService, 'findByShortName').mockImplementationOnce(() =>
-        Promise.resolve(mockOrderingItemList[0]),
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(menuProxyService, 'findByShortName')
+        .mockImplementationOnce(() => Promise.resolve(mockOrderingItemList[0]));
+      const newOrderingLineList = [
+        ...mockOrderingLineSentForPrepationList,
+        mockOrderingLineList[0],
+      ];
+      newOrderingLineList[mockOrderingLineSentForPrepationList.length].howMany =
+        addMenuItemDto.howMany;
+      const mockOpenedTableOrderWithLines = buildMockTableOrder(
+        mockOpened,
+        newOrderingLineList,
       );
-      const newOrderingLineList = [...mockOrderingLineSentForPrepationList, mockOrderingLineList[0]];
-      newOrderingLineList[mockOrderingLineSentForPrepationList.length].howMany = addMenuItemDto.howMany;
-      const mockOpenedTableOrderWithLines = buildMockTableOrder(mockOpened, newOrderingLineList);
-      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValueOnce(mockOpenedTableOrderWithLines);
+      jest
+        .spyOn(model, 'findByIdAndUpdate')
+        .mockResolvedValueOnce(mockOpenedTableOrderWithLines);
 
-      const updatedTableOrder = await service.addOrderingLineToTableOrder(mockOpenedTableOrder._id, addMenuItemDto);
+      const updatedTableOrder = await service.addOrderingLineToTableOrder(
+        mockOpenedTableOrder._id,
+        addMenuItemDto,
+      );
       expect(updatedTableOrder).toEqual(mockOpenedTableOrderWithLines);
     });
 
     it('should add items as updated orderingLine to the tableOrder if tableOrder contains already lines corresponding the to request', async () => {
       const mockOpened = new Date();
-      const mockOpenedTableOrder = buildMockTableOrder(mockOpened, mockOrderingLineList);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
+      const mockOpenedTableOrder = buildMockTableOrder(
+        mockOpened,
+        mockOrderingLineList,
       );
-      jest.spyOn(menuProxyService, 'findByShortName').mockImplementationOnce(() =>
-        Promise.resolve(mockOrderingItemList[0]),
-      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(menuProxyService, 'findByShortName')
+        .mockImplementationOnce(() => Promise.resolve(mockOrderingItemList[0]));
       const newOrderingLineList = [...mockOrderingLineList];
       newOrderingLineList[0].howMany += addMenuItemDto.howMany;
-      const mockOpenedTableOrderWithLines = buildMockTableOrder(mockOpened, newOrderingLineList);
-      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValueOnce(mockOpenedTableOrderWithLines);
+      const mockOpenedTableOrderWithLines = buildMockTableOrder(
+        mockOpened,
+        newOrderingLineList,
+      );
+      jest
+        .spyOn(model, 'findByIdAndUpdate')
+        .mockResolvedValueOnce(mockOpenedTableOrderWithLines);
 
-      const updatedTableOrder = await service.addOrderingLineToTableOrder(mockOpenedTableOrder._id, addMenuItemDto);
+      const updatedTableOrder = await service.addOrderingLineToTableOrder(
+        mockOpenedTableOrder._id,
+        addMenuItemDto,
+      );
       expect(updatedTableOrder).toEqual(mockOpenedTableOrderWithLines);
     });
 
     it('should return AddMenuItemDtoNotFoundException if menu item in param is not found', async () => {
       const mockOpened = new Date();
       const mockOpenedTableOrder = buildMockTableOrder(mockOpened);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
-      );
-      jest.spyOn(menuProxyService, 'findByShortName').mockImplementationOnce(() =>
-        Promise.resolve(null),
-      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(menuProxyService, 'findByShortName')
+        .mockImplementationOnce(() => Promise.resolve(null));
 
       const testAddOrderingLineToTableOrder = async () => {
-        await service.addOrderingLineToTableOrder(mockOpenedTableOrder._id, addMenuItemDto);
+        await service.addOrderingLineToTableOrder(
+          mockOpenedTableOrder._id,
+          addMenuItemDto,
+        );
       };
-      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(AddMenuItemDtoNotFoundException);
+      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(
+        AddMenuItemDtoNotFoundException,
+      );
     });
 
     it('should return AddMenuItemDtoNotFoundException if menu item id in param is not the same as the found one', async () => {
       const mockOpened = new Date();
       const mockOpenedTableOrder = buildMockTableOrder(mockOpened);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
-      );
-      jest.spyOn(menuProxyService, 'findByShortName').mockImplementationOnce(() =>
-        Promise.resolve(mockOrderingItemList[1]),
-      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(menuProxyService, 'findByShortName')
+        .mockImplementationOnce(() => Promise.resolve(mockOrderingItemList[1]));
 
       const testAddOrderingLineToTableOrder = async () => {
-        await service.addOrderingLineToTableOrder(mockOpenedTableOrder._id, addMenuItemDto);
+        await service.addOrderingLineToTableOrder(
+          mockOpenedTableOrder._id,
+          addMenuItemDto,
+        );
       };
-      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(AddMenuItemDtoNotFoundException);
+      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(
+        AddMenuItemDtoNotFoundException,
+      );
     });
 
     it('should return TableOrderAlreadyBilledException if tableOrder is already billed', async () => {
       const mockOpened = new Date();
       const mockBilled = new Date();
-      const mockBilledTableOrder = buildMockTableOrder(mockOpened, [], [], mockBilled);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockBilledTableOrder),
+      const mockBilledTableOrder = buildMockTableOrder(
+        mockOpened,
+        [],
+        [],
+        mockBilled,
       );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockBilledTableOrder));
 
       const testAddOrderingLineToTableOrder = async () => {
-        await service.addOrderingLineToTableOrder(mockBilledTableOrder._id, addMenuItemDto);
+        await service.addOrderingLineToTableOrder(
+          mockBilledTableOrder._id,
+          addMenuItemDto,
+        );
       };
-      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(TableOrderAlreadyBilledException);
+      await expect(testAddOrderingLineToTableOrder).rejects.toThrow(
+        TableOrderAlreadyBilledException,
+      );
     });
   });
 
   describe('manageOrderingLines', () => {
     it('should return ordering lines with preparations', async () => {
-      jest.spyOn(kitchenProxyService, 'sendItemsToCook').mockImplementationOnce(() =>
-        Promise.resolve(mockPreparations),
-      );
+      jest
+        .spyOn(kitchenProxyService, 'sendItemsToCook')
+        .mockImplementationOnce(() => Promise.resolve(mockPreparations));
 
-      const orderingLineWithCookedItems = await service.manageOrderingLines(mockTable.number, mockOrderingLineList);
-      expect(orderingLineWithCookedItems.orderingLines).toEqual(mockOrderingLineSentForPrepationList);
-      expect(orderingLineWithCookedItems.preparations).toEqual(mockPreparations);
-    })
+      const orderingLineWithCookedItems = await service.manageOrderingLines(
+        mockTable.number,
+        mockOrderingLineList,
+      );
+      expect(orderingLineWithCookedItems.orderingLines).toEqual(
+        mockOrderingLineSentForPrepationList,
+      );
+      expect(orderingLineWithCookedItems.preparations).toEqual(
+        mockPreparations,
+      );
+    });
 
     it('should return ordering lines with empty preparations', async () => {
+      jest
+        .spyOn(kitchenProxyService, 'sendItemsToCook')
+        .mockImplementationOnce((tableNumber, orderingLines) => {
+          if (orderingLines.length === 0) {
+            return Promise.resolve([]);
+          }
 
-      jest.spyOn(kitchenProxyService, 'sendItemsToCook').mockImplementationOnce((tableNumber, orderingLines) => {
-        if (orderingLines.length === 0) {
-          return Promise.resolve([]);
-        }
+          return Promise.resolve(mockPreparations);
+        });
 
-        return Promise.resolve(mockPreparations);
-      });
-
-      const orderingLineWithCookedItems = await service.manageOrderingLines(mockTable.number, mockOrderingLineSentForPrepationList);
-      expect(orderingLineWithCookedItems.orderingLines).toEqual(mockOrderingLineSentForPrepationList);
+      const orderingLineWithCookedItems = await service.manageOrderingLines(
+        mockTable.number,
+        mockOrderingLineSentForPrepationList,
+      );
+      expect(orderingLineWithCookedItems.orderingLines).toEqual(
+        mockOrderingLineSentForPrepationList,
+      );
       expect(orderingLineWithCookedItems.preparations).toEqual([]);
-    })
+    });
   });
 
   describe('sendItemsForPreparation', () => {
     it('should send items from tableOrder to preparation', async () => {
       const mockOpened = new Date();
-      const mockOpenedTableOrderWithLines = buildMockTableOrder(mockOpened, mockOrderingLineList);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrderWithLines),
+      const mockOpenedTableOrderWithLines = buildMockTableOrder(
+        mockOpened,
+        mockOrderingLineList,
       );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() =>
+          Promise.resolve(mockOpenedTableOrderWithLines),
+        );
       let mockPreparationsIndex = -1;
-      jest.spyOn(service, 'manageOrderingLines').mockImplementation((tableNumber, orderingLines) => {
-        const preparations = [];
-        for (let j = 0; j < orderingLines.length; j += 1) {
-          for (let i = 0; i < orderingLines[j].howMany; i += 1) {
-            mockPreparationsIndex += 1;
-            preparations.push(mockPreparations[mockPreparationsIndex]);
+      jest
+        .spyOn(service, 'manageOrderingLines')
+        .mockImplementation((tableNumber, orderingLines) => {
+          const preparations = [];
+          for (let j = 0; j < orderingLines.length; j += 1) {
+            for (let i = 0; i < orderingLines[j].howMany; i += 1) {
+              mockPreparationsIndex += 1;
+              preparations.push(mockPreparations[mockPreparationsIndex]);
+            }
           }
-        }
-        return Promise.resolve({ orderingLines, preparations });
-      });
+          return Promise.resolve({ orderingLines, preparations });
+        });
 
-      const mockUpdatedTableOrderWithLines = buildMockTableOrder(mockOpened, mockOrderingLineSentForPrepationList);
-      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValueOnce(mockUpdatedTableOrderWithLines);
+      const mockUpdatedTableOrderWithLines = buildMockTableOrder(
+        mockOpened,
+        mockOrderingLineSentForPrepationList,
+      );
+      jest
+        .spyOn(model, 'findByIdAndUpdate')
+        .mockResolvedValueOnce(mockUpdatedTableOrderWithLines);
 
-      const newCookedItems = await service.sendItemsForPreparation(mockOpenedTableOrderWithLines._id);
+      const newCookedItems = await service.sendItemsForPreparation(
+        mockOpenedTableOrderWithLines._id,
+      );
       expect(newCookedItems).toEqual(mockPreparations);
     });
 
     it('should return TableOrderAlreadyBilledException if tableOrder is already billed', async () => {
       const mockOpened = new Date();
       const mockBilled = new Date();
-      const mockBilledTableOrder = buildMockTableOrder(mockOpened, [], [], mockBilled);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockBilledTableOrder),
+      const mockBilledTableOrder = buildMockTableOrder(
+        mockOpened,
+        [],
+        [],
+        mockBilled,
       );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockBilledTableOrder));
 
       const testSendItemsForPreparation = async () => {
         await service.sendItemsForPreparation(mockBilledTableOrder._id);
       };
-      await expect(testSendItemsForPreparation).rejects.toThrow(TableOrderAlreadyBilledException);
+      await expect(testSendItemsForPreparation).rejects.toThrow(
+        TableOrderAlreadyBilledException,
+      );
     });
   });
 
@@ -483,32 +583,48 @@ describe('TableOrdersService', () => {
     it('should bill order of tableOrder', async () => {
       const mockOpened = new Date();
       const mockOpenedTableOrder = buildMockTableOrder(mockOpened);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockOpenedTableOrder),
-      );
-      jest.spyOn(tablesService, 'releaseTable').mockImplementationOnce(() =>
-        Promise.resolve(mockTable),
-      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockOpenedTableOrder));
+      jest
+        .spyOn(tablesService, 'releaseTable')
+        .mockImplementationOnce(() => Promise.resolve(mockTable));
       const mockBilled = new Date();
-      const mockBilledTableOrder = buildMockTableOrder(mockOpened, [], [], mockBilled);
-      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValueOnce(mockBilledTableOrder);
+      const mockBilledTableOrder = buildMockTableOrder(
+        mockOpened,
+        [],
+        [],
+        mockBilled,
+      );
+      jest
+        .spyOn(model, 'findByIdAndUpdate')
+        .mockResolvedValueOnce(mockBilledTableOrder);
 
-      const updatedTableOrder = await service.billOrder(mockOpenedTableOrder._id);
+      const updatedTableOrder = await service.billOrder(
+        mockOpenedTableOrder._id,
+      );
       expect(updatedTableOrder).toEqual(mockBilledTableOrder);
     });
 
     it('should return TableOrderAlreadyBilledException if tableOrder is already billed', async () => {
       const mockOpened = new Date();
       const mockBilled = new Date();
-      const mockBilledTableOrder = buildMockTableOrder(mockOpened, [], [], mockBilled);
-      jest.spyOn(service, 'findOne').mockImplementationOnce(() =>
-        Promise.resolve(mockBilledTableOrder),
+      const mockBilledTableOrder = buildMockTableOrder(
+        mockOpened,
+        [],
+        [],
+        mockBilled,
       );
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() => Promise.resolve(mockBilledTableOrder));
 
       const testBillOrder = async () => {
         await service.billOrder(mockBilledTableOrder._id);
       };
-      await expect(testBillOrder).rejects.toThrow(TableOrderAlreadyBilledException);
+      await expect(testBillOrder).rejects.toThrow(
+        TableOrderAlreadyBilledException,
+      );
     });
   });
 });

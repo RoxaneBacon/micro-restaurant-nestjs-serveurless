@@ -59,7 +59,9 @@ describe('MenuProxyService', () => {
     getFullMenuAxiosResponse = {
       data: mockMenuItemList,
       headers: {},
-      config: { url: `http://${mockDependenciesConfig.menu_service_url_with_port}/menus` },
+      config: {
+        url: `http://${mockDependenciesConfig.menu_service_url_with_port}/menus`,
+      },
       status: 200,
       statusText: 'OK',
     } as any;
@@ -67,8 +69,8 @@ describe('MenuProxyService', () => {
     mockOrderingItem = {
       _id: mockMenuItem._id,
       shortName: mockMenuItem.shortName,
+      ingredients: [],
     };
-
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -100,16 +102,22 @@ describe('MenuProxyService', () => {
 
   describe('findByShortName', () => {
     it('should return the right OrderingItem from given menu item shortname', async () => {
-      jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(getFullMenuAxiosResponse));
+      jest
+        .spyOn(httpService, 'get')
+        .mockImplementationOnce(() => of(getFullMenuAxiosResponse));
 
       const orderingItem = await service.findByShortName(mockMenuItemShortName);
       expect(orderingItem).toEqual(mockOrderingItem);
     });
 
     it('should return null if given menu item shortname is not found', async () => {
-      jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(getFullMenuAxiosResponse));
+      jest
+        .spyOn(httpService, 'get')
+        .mockImplementationOnce(() => of(getFullMenuAxiosResponse));
 
-      const orderingItem = await service.findByShortName(mockUnknownMenuItemShortName);
+      const orderingItem = await service.findByShortName(
+        mockUnknownMenuItemShortName,
+      );
       expect(orderingItem).toBeNull();
     });
   });
