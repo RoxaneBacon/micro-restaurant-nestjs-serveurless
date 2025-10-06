@@ -105,7 +105,7 @@ export const dishes: DishDto[] = [
         description:
             "Limonade fraîchement préparée avec des citrons, de l'eau pétillante et une touche de sucre.",
         price: 3,
-        category: categories[2],
+        category: categories[3],
         ingredients: [
             {
                 _id: `4_${ingredients[26]._id}`,
@@ -176,7 +176,7 @@ export const dishes: DishDto[] = [
         description:
             'Jus de pomme fraîchement pressé, sucré naturellement et rafraîchissant.',
         price: 3,
-        category: categories[2],
+        category: categories[3],
         ingredients: [
             {
                 _id: `6_${ingredients[27]._id}`,
@@ -199,7 +199,7 @@ export const dishes: DishDto[] = [
         description:
             'Un café expresso riche et aromatique, préparé avec des grains de café de haute qualité.',
         price: 2,
-        category: categories[2],
+        category: categories[3],
         ingredients: [
             {
                 _id: `7_${ingredients[29]._id}`,
