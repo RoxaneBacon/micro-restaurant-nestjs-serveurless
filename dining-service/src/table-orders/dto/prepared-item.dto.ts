@@ -16,12 +16,13 @@ export class PreparedItemDto {
   ingredients: DishItemDto[];
 
   static kitchenPreparedItemToPreparedItemDtoFactory(
-    kitchenPreparedItem: PreparedItemDto,
+    kitchenPreparedItem,
   ): PreparedItemDto {
     const preparedItem: PreparedItemDto = new PreparedItemDto();
     preparedItem._id = kitchenPreparedItem._id;
     preparedItem.shortName = kitchenPreparedItem.shortName;
     preparedItem.ingredients = kitchenPreparedItem.ingredients;
+
     return preparedItem;
   }
 }

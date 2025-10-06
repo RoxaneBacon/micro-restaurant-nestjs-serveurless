@@ -44,7 +44,7 @@ export class StartupLogicService implements OnApplicationBootstrap {
     /* Starters */
     try {
       await this.addRecipe(
-        'saumon fumé',
+        'Saumon fumé',
         PostEnum.COLD_DISH,
         [
           'Placer le saumon fumé sur une assiette',
@@ -56,9 +56,10 @@ export class StartupLogicService implements OnApplicationBootstrap {
     } catch (e) {}
     try {
       await this.addRecipe(
-        'guacamole',
+        'Guacamole',
         PostEnum.COLD_DISH,
-        [,
+        [
+          ,
           'Écraser les avocats',
           'Ajouter le jus de citron',
           "Incorporer les tomates, l'oignon et la coriandre",
@@ -72,7 +73,7 @@ export class StartupLogicService implements OnApplicationBootstrap {
     /* Main */
     try {
       await this.addRecipe(
-        'caesar salad',
+        'Caesar',
         PostEnum.COLD_DISH,
         [
           'Take lettuce',
@@ -87,19 +88,15 @@ export class StartupLogicService implements OnApplicationBootstrap {
     } catch (e) {}
     try {
       await this.addRecipe(
-        'spaghetti bolognese',
+        'Bolognese',
         PostEnum.HOT_DISH,
-        [
-          'Take spaghetti',
-          'Add bolognese sauce',
-          'Mix it all',
-        ],
+        ['Take spaghetti', 'Add bolognese sauce', 'Mix it all'],
         12,
       );
     } catch (e) {}
     try {
       await this.addRecipe(
-        'vegetarian wrap',
+        'Wrap Végétarien',
         PostEnum.COLD_DISH,
         [
           'Take a tortilla',
@@ -112,19 +109,15 @@ export class StartupLogicService implements OnApplicationBootstrap {
     } catch (e) {}
     try {
       await this.addRecipe(
-        'Pates Carbonara',
+        'Carbonara',
         PostEnum.HOT_DISH,
-        [
-          'Take spaghetti',
-          'Add carbonara sauce',
-          'Mix it all',
-        ],
+        ['Take spaghetti', 'Add carbonara sauce', 'Mix it all'],
         12,
       );
     } catch (e) {}
     try {
       await this.addRecipe(
-        "Serv'Burger",
+        'Burger',
         PostEnum.HOT_DISH,
         [
           'Take a burger bun',
@@ -140,7 +133,7 @@ export class StartupLogicService implements OnApplicationBootstrap {
     /* Desserts */
     try {
       await this.addRecipe(
-        'tiramisu',
+        'Tiramisu',
         PostEnum.COLD_DISH,
         ['Take a prepared tiramisu'],
         10,
@@ -148,7 +141,7 @@ export class StartupLogicService implements OnApplicationBootstrap {
     } catch (e) {}
     try {
       await this.addRecipe(
-        'mousse au chocolat',
+        'Mousse Chocolat',
         PostEnum.COLD_DISH,
         ['Take a prepared mousse au chocolat'],
         10,
@@ -158,28 +151,13 @@ export class StartupLogicService implements OnApplicationBootstrap {
     /* Beverage */
 
     try {
-      await this.addRecipe(
-        'lemonade',
-        PostEnum.BAR,
-        ['Serve it!'],
-        2,
-      );
+      await this.addRecipe('Limonade', PostEnum.BAR, ['Serve it!'], 2);
     } catch (e) {}
     try {
-      await this.addRecipe(
-        'apple juice',
-        PostEnum.BAR,
-        [ 'Serve it!'],
-        2,
-      );
+      await this.addRecipe('Jus de Pomme', PostEnum.BAR, ['Serve it!'], 2);
     } catch (e) {}
     try {
-      await this.addRecipe(
-        'Café Expresso',
-        PostEnum.BAR,
-        ['Brew it', 'Serve it!'],
-        5,
-      );
+      await this.addRecipe('Café', PostEnum.BAR, ['Brew it', 'Serve it!'], 5);
     } catch (e) {}
   }
 }

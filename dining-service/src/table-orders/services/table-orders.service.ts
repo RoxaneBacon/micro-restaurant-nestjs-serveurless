@@ -74,6 +74,7 @@ export class TableOrdersService {
       await this.menuProxyService.findByShortName(
         addMenuItemDto.menuItemShortName,
       );
+    orderingItem.ingredients = addMenuItemDto.ingredients;
 
     if (orderingItem === null) {
       throw new AddMenuItemDtoNotFoundException(addMenuItemDto);
@@ -93,7 +94,8 @@ export class TableOrdersService {
     if (alreadyOrderedLinesIndexes.length > 0) {
       const orderingLineIndex = alreadyOrderedLinesIndexes[0];
       tableOrder.lines[orderingLineIndex].howMany += addMenuItemDto.howMany;
-
+      tableOrder.lines[orderingLineIndex].item.ingredients =
+        addMenuItemDto.ingredients;
       return this.tableOrderModel.findByIdAndUpdate(
         tableOrder._id,
         tableOrder,

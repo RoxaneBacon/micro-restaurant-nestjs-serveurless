@@ -16,6 +16,7 @@ import { TablesModule } from '../src/tables/tables.module';
 
 import { TableOrdersService } from '../src/table-orders/services/table-orders.service';
 import { OrderingItem } from '../src/table-orders/schemas/ordering-item.schema';
+import { OrderingLine } from '../src/table-orders/schemas/ordering-line.schema';
 
 describe('TableOrdersController (e2e)', () => {
   let app: INestApplication;
@@ -64,7 +65,26 @@ describe('TableOrdersController (e2e)', () => {
     {
       _id: 'menu item id 1',
       shortName: 'menu item shortname 1',
-      ingredients: [],
+      ingredients: [
+        {
+          _id: 'di1+',
+          ingredient: {
+            _id: 'ing1',
+            name: 'Extra Cheese',
+            extraCost: 2.0,
+          },
+          quantity: 'extra',
+        },
+        {
+          _id: 'di2',
+          ingredient: {
+            _id: 'ing2',
+            name: 'Bacon',
+            extraCost: 3.0,
+          },
+          quantity: 'base',
+        },
+      ],
     },
     {
       _id: 'menu item id 2',
@@ -78,7 +98,7 @@ describe('TableOrdersController (e2e)', () => {
     },
   ];
 
-  const mockOrderingLineList = [
+  const mockOrderingLineList: OrderingLine[] = [
     {
       item: mockOrderingItemList[0],
       howMany: 1,
