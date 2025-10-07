@@ -5,6 +5,9 @@ import OrderController from "./order/controller/order.controller";
 import {setupSwagger} from "./shared/config/swagger";
 import {connectDB} from "./shared/config/mongodb";
 import dotenv from "dotenv";
+import { Request } from "express";
+import cors from "cors";
+
 
 // Load environment variables
 dotenv.config();
@@ -12,11 +15,12 @@ dotenv.config();
 const app = express();
 const port = process.env.APP_PORT;
 
+app.use(cors<Request>());
 app.use(bodyParser.json());
 
 // Register controllers
 app.use("/menu", MenuController);
-app.use("/order", OrderController);
+app.use("/order", OrderController); 
 
 // Setup Swagger
 setupSwagger(app);
