@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import axios from "axios";
 import {OrderDto, OrderItemDto} from "../dto/order.dto";
-import {TableDto} from "../dto/table.dto";
 import {TableOrderDto} from "../dto/table-order.dto";
 import {PreparationDto} from "../dto/preparation.dto";
 import {IOrderService} from "../interface/IOrderService";
@@ -21,6 +20,43 @@ type PartialPaymentMap = { [orderID: string]: OrderPaymentMap };
 
 class OrderService implements IOrderService {
     partialPaymentStorage: PartialPaymentMap = {};
+
+    async createOrder(order: OrderDto) {
+        console.log(`[OrderService] Creating order with id: ${order._id}`);
+
+        // 1. Initialize a table with the number of customers
+        const initializeTable = await axios.post(`${API_DINING_BASE}/tableOrders`, {
+            tableNumber: Number(order.tableId),
+            customersCount: order.customerCount,
+        });
+
+        console.log(`[OrderService] Initialized table ${order.tableId} for order ${order._id}`);
+
+        if (initializeTable.status !== 201) {
+            throw new Error(`Failed to initialize table ${order.tableId}`);
+        }
+
+        console.log(`[OrderService] Table initialized:`, initializeTable.data);
+
+        // 3. Add the items to the tableOrder
+        const tableOrder: TableOrderDto = initializeTable.data;
+        for (const item of order.items) {
+            console.log(`[OrderService] Adding item ${item._id} to table order ${tableOrder._id}`);
+
+            const reponse = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
+                menuItemId: item._mongoId,
+                menuItemShortName: item.dish.shortName,
+                howMany: item.quantity,
+                ingredients: item.dish.ingredients,
+            });
+            if (reponse.status !== 201) {
+                // If the item is not added send an error
+                throw new Error(`Failed to add item ${item._id} to table order ${tableOrder._id}`);
+            }
+        }
+        console.log(`[OrderService] All items added to table order ${tableOrder._id}`);
+        return tableOrder._id;
+    }
 
     tryToBillFullOrder(order: OrderDto): Promise<boolean> {
         const orderId = order._id;
@@ -58,6 +94,7 @@ class OrderService implements IOrderService {
     }
 
     private isItemFullyPaid(orderId: string, item: OrderItemDto): boolean {
+        console.log(`Checking if item ${item._id} in order ${orderId} is fully paid.`);
         const itemPayments = this.partialPaymentStorage[orderId][item._id];
         if (!itemPayments) return false;
         const itemPrice = this.calculateOrderItemPrice(item.dish, item.quantity);
@@ -70,6 +107,7 @@ class OrderService implements IOrderService {
 
     payOrderPart(order: OrderDto, itemId: string, payment: OrderItemPayment, sharedBy: number): OrderDto {
         const orderId = order._id;
+        console.log(`[OrderService] Paying part of order item ${itemId} in order ${orderId}`);
         const item: OrderItemDto | undefined = order.items.find((i) => i._id === itemId);
         if (!item) {
             console.error(`Order item with ID ${itemId} not found`);
@@ -79,6 +117,7 @@ class OrderService implements IOrderService {
             this.partialPaymentStorage[orderId] = {};
         }
         if (!this.partialPaymentStorage[orderId][itemId]) {
+            console.log(`Creating new payment record for item ${itemId} in order ${orderId}`);
             this.partialPaymentStorage[orderId][itemId] = {
                 sharedBy,
                 payments: [],
@@ -104,35 +143,6 @@ class OrderService implements IOrderService {
         }, 0);
         const unitPrice = dish.price + extraCost;
         return unitPrice * quantity;
-    }
-
-    async createOrder(order: OrderDto) {
-        console.log(`[OrderService] Creating order with id: ${order._id}`);
-        // 1. Initialize a table with the number of customers
-        const initializeTable = await axios.post(`${API_DINING_BASE}/${order.tableId}`, {
-            tableNumber: order.tableId,
-            customersCount: order.customerCount,
-        });
-
-        if (initializeTable.status !== 201) {
-            throw new Error(`Failed to initialize table ${order.tableId}`);
-        }
-
-        // 3. Add the items to the tableOrder
-        const tableOrder = initializeTable.data;
-        for (const item of order.items) {
-            const reponse = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
-                menuItemId: item._id,
-                menuItemShortName: item.dish.shortName,
-                howMany: item.quantity
-            });
-            console.log(`[OrderService] Added item ${item._id} to table order ${tableOrder._id}`);
-            if (reponse.status !== 201) {
-                // If the item is not added send an error
-                throw new Error(`Failed to add item ${item._id} to table order ${tableOrder._id}`);
-            }
-        }
-        return tableOrder._id;
     }
 
     private async startOrderPreparation(tableOrderId: string) {

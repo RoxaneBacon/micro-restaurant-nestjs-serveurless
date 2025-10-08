@@ -21,12 +21,15 @@ export type OrderStatus = "OPEN" | "PAID" | "READY" | "CLOSED";
  *       type: object
  *       required:
  *         - _id
+ *         - _mongoId
  *         - dish
  *         - quantity
  *         - price
- *         - extra_list
+ *         - leftToPay
  *       properties:
  *         _id:
+ *           type: string
+ *         _mongoId:
  *           type: string
  *         dish:
  *           $ref: '#/components/schemas/DishDto'
@@ -34,10 +37,14 @@ export type OrderStatus = "OPEN" | "PAID" | "READY" | "CLOSED";
  *           type: number
  *         price:
  *           type: number
- *         extra_list:
+ *         payments:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/IngredientDto'
+ *             $ref: '#/components/schemas/OrderItemPayment'
+ *         sharedBy:
+ *           type: number
+ *         leftToPay:
+ *           type: number
  */
 export interface OrderItemDto {
     _id: string
@@ -58,6 +65,7 @@ export interface OrderItemDto {
  *       type: object
  *       required:
  *         - _id
+ *         - tableId
  *         - status
  *         - items
  *         - openedAt
@@ -65,6 +73,8 @@ export interface OrderItemDto {
  *       properties:
  *         _id:
  *           type: string
+ *         tableId:
+ *           type: number
  *         status:
  *           $ref: '#/components/schemas/OrderStatus'
  *         items:

@@ -1,12 +1,14 @@
 import {Router, Request, Response} from "express";
 import OrderService from "../service/order.service";
 import {handlePromiseError} from "../../utils/handlePromiseError";
+import {OrderDto} from "../dto/order.dto";
+import {OrderItemPayment} from "../dto/order-item-payment.dto";
 
 const router = Router();
 
 /**
  * @openapi
- * /order/{id}:
+ * /order:
  *   post:
  *     summary: Create a new order
  *     tags:
@@ -33,27 +35,26 @@ router.post("/", (req: Request, res: Response) => {
     console.log("[OrderController] POST - Creating a new order");
 
     OrderService.createOrder(req.body)
-        .then(order => {
-            console.log(`[OrderController] Successfully created order with id: ${order._id}`);
-            res.status(201).json(order);
+        .then(id => {
+            console.log(`[OrderController] Successfully created order with id: ${id}`);
+            res.status(201).json(id);
         })
         .catch(handlePromiseError(res, "OrderController.createOrder"));
 });
 
 /**
  * @openapi
- * /order/{id}/pay:
+ * /order/pay:
  *   post:
  *     summary: Pay for an existing order
  *     tags:
  *       - Order
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the order to pay
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OrderDto'
  *     responses:
  *       200:
  *         description: Order paid successfully
@@ -61,38 +62,52 @@ router.post("/", (req: Request, res: Response) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/TableOrderDto'
+ *       422:
+ *         description: Unable to process payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 message:
+ *                   type: string
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/:id/pay", (req: Request, res: Response) => {
-    const orderId = req.params.id;
-    const orderDto = req.body;
-    console.log(`[OrderController] POST /${orderId}/pay - Paying order with id: ${orderId}`);
+
+router.post("/pay", (req: Request, res: Response) => {
+    const orderDto: OrderDto = req.body;
+    console.log(`[OrderController] POST /pay - Paying order with id: ${orderDto._id}`);
 
     OrderService.tryToBillFullOrder(orderDto)
-        .then(order => {
-            console.log(`[OrderController] Successfully paid order with id: ${orderId}`);
-            res.status(200).json(order);
+        .then(result => {
+            if (result) {
+                console.log(`[OrderController] Successfully paid order with id: ${orderDto._id}`);
+                res.status(200).json(result);
+            } else {
+                console.log(`[OrderController] Unable to process payment for order with id: ${orderDto._id}`);
+                res.status(422).json({
+                    error: "Unable to process payment",
+                    message: "Order cannot be fully billed at this time"
+                });
+            }
         })
         .catch(handlePromiseError(res, "OrderController.tryToBillFullOrder"));
 });
 
+
 /**
  * @openapi
- * /order/{id}/payment-item/{itemId}:
+ * /order/payment-item/{itemId}:
  *   post:
  *     summary: Pay part of an order item
  *     tags:
  *       - Order
  *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the order
  *       - name: itemId
  *         in: path
  *         required: true
@@ -122,17 +137,16 @@ router.post("/:id/pay", (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/:id/payment-item/:itemId", (req: Request, res: Response) => {
-    const orderId = req.params.id;
+router.post("/payment-item/:itemId", (req: Request, res: Response) => {
     const itemId = req.params.itemId;
-    const {orderDto, payment} = req.body;
-    console.log(`[OrderController] POST /${orderId}/payment-item/${itemId} - Paying part of order item with id: ${itemId} for order id: ${orderId}`);
+    const {orderDto, payment}: {orderDto: OrderDto, payment: OrderItemPayment} = req.body;
+    console.log(`[OrderController] POST /payment-item/${itemId} - Paying part of order item with id: ${itemId}`);
     try {
         const order = OrderService.payOrderPart(orderDto, itemId, payment, orderDto.customerCount)
-        console.log(`[OrderController] Successfully paid part of order item with id: ${itemId} for order id: ${orderId}`);
+        console.log(`[OrderController] Successfully paid part of order item with id: ${itemId}`);
         res.status(200).json(order);
     } catch (error) {
-        console.error(`[OrderController] Failed to pay part of order item with id: ${itemId} for order id: ${orderId}:`, error);
+        console.error(`[OrderController] Failed to pay part of order item with id: ${itemId}:`, error);
         handlePromiseError(res, "OrderController.payOrderPart");
     }
 });
