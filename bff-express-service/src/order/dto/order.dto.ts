@@ -1,5 +1,6 @@
 import {DishDto} from "../../menu/dto/dish.dto";
 import {IngredientDto} from "../../menu/dto/ingredient.dto";
+import {OrderItemPayment} from "./order-item-payment.dto";
 
 /**
  * @openapi
@@ -39,11 +40,14 @@ export type OrderStatus = "OPEN" | "PAID" | "READY" | "CLOSED";
  *             $ref: '#/components/schemas/IngredientDto'
  */
 export interface OrderItemDto {
-    _id: string;
-    dish: DishDto;
-    quantity: number;
-    price: number;
-    extra_list: IngredientDto[];
+    _id: string
+    _mongoId: string
+    dish: DishDto
+    quantity: number
+    price: number
+    payments?: OrderItemPayment[]
+    sharedBy?: number
+    leftToPay: number
 }
 
 /**
@@ -79,6 +83,7 @@ export interface OrderItemDto {
  */
 export interface OrderDto {
     _id: string;
+    tableId: number;
     status: OrderStatus;
     items: OrderItemDto[];
     openedAt: string; // date-time format
