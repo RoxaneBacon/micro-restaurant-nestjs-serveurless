@@ -15,6 +15,7 @@ describe('OrderingItem', () => {
     const anObject = {
       _id: 'item id',
       shortName: 'item shortName',
+      ingredients: [],
       anotherProp: 'anotherValue',
       ingredients: [],
     };

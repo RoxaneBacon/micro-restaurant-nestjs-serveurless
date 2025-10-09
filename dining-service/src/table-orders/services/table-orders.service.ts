@@ -84,9 +84,33 @@ export class TableOrdersService {
       throw new AddMenuItemDtoNotFoundException(addMenuItemDto);
     }
 
+    // Helper function to compare ingredients
+    const ingredientsMatch = (
+      ingredients1: any[],
+      ingredients2: any[],
+    ): boolean => {
+      if (ingredients1.length !== ingredients2.length) return false;
+
+      const sorted1 = ingredients1.sort((a, b) => a._id.localeCompare(b._id));
+      const sorted2 = ingredients2.sort((a, b) => a._id.localeCompare(b._id));
+
+      return sorted1.every((ing1, index) => {
+        const ing2 = sorted2[index];
+        return (
+          ing1._id === ing2._id &&
+          ing1.quantity === ing2.quantity &&
+          JSON.stringify(ing1.ingredient) === JSON.stringify(ing2.ingredient)
+        );
+      });
+    };
+
     const alreadyOrderedLinesIndexes = [];
     tableOrder.lines.forEach((line, index) => {
-      if (!line.sentForPreparation && line.item._id === orderingItem._id) {
+      if (
+        !line.sentForPreparation &&
+        line.item._id === orderingItem._id &&
+        ingredientsMatch(line.item.ingredients, addMenuItemDto.ingredients)
+      ) {
         alreadyOrderedLinesIndexes.push(index);
       }
     });
@@ -94,8 +118,6 @@ export class TableOrdersService {
     if (alreadyOrderedLinesIndexes.length > 0) {
       const orderingLineIndex = alreadyOrderedLinesIndexes[0];
       tableOrder.lines[orderingLineIndex].howMany += addMenuItemDto.howMany;
-      tableOrder.lines[orderingLineIndex].item.ingredients =
-        addMenuItemDto.ingredients;
       return this.tableOrderModel.findByIdAndUpdate(
         tableOrder._id,
         tableOrder,

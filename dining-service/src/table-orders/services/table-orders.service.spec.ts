@@ -36,7 +36,6 @@ describe('TableOrdersService', () => {
   let mockOrderingLineList: OrderingLine[];
   let mockOrderingLineSentForPrepationList: OrderingLine[];
   let buildMockTableOrder: Function;
-  let mockGetTableOrderParams: GetTableOrderParams;
   let startOrderingDto: StartOrderingDto;
   let addMenuItemDto: AddMenuItemDto;
   let mockPreparedItems: PreparedItemDto[];
@@ -143,10 +142,6 @@ describe('TableOrdersService', () => {
       preparations,
       billed,
     });
-
-    mockGetTableOrderParams = {
-      tableOrderId: mockTableOrder._id,
-    };
 
     startOrderingDto = {
       tableNumber: 12,
