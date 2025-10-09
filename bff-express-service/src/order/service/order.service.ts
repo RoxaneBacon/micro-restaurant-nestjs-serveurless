@@ -41,7 +41,7 @@ class OrderService implements IOrderService {
         // 3. Add the items to the tableOrder
         const tableOrder: TableOrderDto = initializeTable.data;
         for (const item of order.items) {
-            console.log(`[OrderService] Adding item ${item._id} to table order ${tableOrder._id}`);
+            console.log(`[OrderService] Adding item ${item._id} to order ${tableOrder._id}`);
 
             const reponse = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
                 menuItemId: item._mongoId,
