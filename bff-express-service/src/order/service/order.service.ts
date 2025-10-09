@@ -36,7 +36,7 @@ class OrderService implements IOrderService {
             throw new Error(`Failed to initialize table ${order.tableId}`);
         }
 
-        console.log(`[OrderService] Table initialized:`, initializeTable.data);
+        console.log(`[OrderService] Order initialized:`, initializeTable.data);
 
         // 3. Add the items to the tableOrder
         const tableOrder: TableOrderDto = initializeTable.data;
