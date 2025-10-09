@@ -32,10 +32,6 @@ class OrderService implements IOrderService {
 
         console.log(`[OrderService] Initialized table ${order.tableId} for order ${order._id}`);
 
-        if (initializeTable.status !== 201) {
-            throw new Error(`Failed to initialize table ${order.tableId}`);
-        }
-
         console.log(`[OrderService] Table initialized:`, initializeTable.data);
 
         // 3. Add the items to the tableOrder
@@ -49,10 +45,6 @@ class OrderService implements IOrderService {
                 howMany: item.quantity,
                 ingredients: item.dish.ingredients,
             });
-            if (reponse.status !== 201) {
-                // If the item is not added send an error
-                throw new Error(`Failed to add item ${item._id} to table order ${tableOrder._id}`);
-            }
         }
         console.log(`[OrderService] All items added to table order ${tableOrder._id}`);
         return tableOrder._id;
@@ -148,9 +140,6 @@ class OrderService implements IOrderService {
     private async startOrderPreparation(tableOrderId: string) {
         console.log(`[OrderService] Starting order preparation for table order id: ${tableOrderId}`);
         const response = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrderId}/prepare`);
-        if (response.status !== 200) {
-            throw new Error(`Failed to start order preparation for table order id: ${tableOrderId}`);
-        }
         return response.data as PreparationDto;
     }
 
@@ -162,10 +151,6 @@ class OrderService implements IOrderService {
 
         // Pay the order
         const response = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrderId}/bill`);
-        if (response.status !== 200) {
-            throw new Error(`Failed to pay order with id: ${tableOrderId}`);
-        }
-
         return response.data as TableOrderDto;
     }
 }
