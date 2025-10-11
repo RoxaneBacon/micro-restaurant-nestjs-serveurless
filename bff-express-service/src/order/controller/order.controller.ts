@@ -87,14 +87,10 @@ router.post("/pay", (req: Request, res: Response) => {
         .then(result => {
             if (result) {
                 console.log(`[OrderController] Successfully paid order with id: ${orderDto._id}`);
-                res.status(200).json(result);
             } else {
-                console.log(`[OrderController] Unable to process payment for order with id: ${orderDto._id}`);
-                res.status(422).json({
-                    error: "Unable to process payment",
-                    message: "Order cannot be fully billed at this time"
-                });
+                console.log(`[OrderController] Order is not fully paid yet, cannot proceed to full payment.`);
             }
+            res.status(200).json(result);
         })
         .catch(handlePromiseError(res, "OrderController.tryToBillFullOrder"));
 });

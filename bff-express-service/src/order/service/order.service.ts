@@ -54,7 +54,7 @@ class OrderService implements IOrderService {
         const orderId = order._id;
         // 1. vérifier si les paiements partiels couvrent toute la commande selon ce qui stocké en mémoire
         if (!this.isOrderFullyPaid(order)) {
-            // 2. si non, retourner la commande avec les paiements partiels mis à jour
+            // 2. si non, retourner false
             console.log(`[OrderService] Order ${orderId} is not fully paid yet.`);
             return Promise.resolve(false);
         }
@@ -66,11 +66,7 @@ class OrderService implements IOrderService {
             this.payOrder(orderId);
             return Promise.resolve(true);
         } catch (error) {
-            console.error(
-                `[OrderService] Failed to pay order ${orderId}:`,
-                error,
-            );
-            return Promise.resolve(false);
+            throw new Error(`Failed to pay for order ${orderId}: ${error}`);
         }
     }
 
