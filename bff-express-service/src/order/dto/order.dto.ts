@@ -93,7 +93,7 @@ export interface OrderItemDto {
  */
 export interface OrderDto {
     _id: string;
-    tableId: number;
+    chevaletId: number;
     status: OrderStatus;
     items: OrderItemDto[];
     openedAt: string; // date-time format

@@ -80,7 +80,7 @@ router.post("/", (req: Request, res: Response) => {
  */
 
 router.post("/pay", (req: Request, res: Response) => {
-    const orderDto: OrderDto = req.body;
+    const orderDto: OrderDto = req.body.orderDto;
     console.log(`[OrderController] POST /pay - Paying order with id: ${orderDto._id}`);
 
     OrderService.tryToBillFullOrder(orderDto)

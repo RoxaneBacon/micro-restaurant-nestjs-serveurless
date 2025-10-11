@@ -26,11 +26,11 @@ class OrderService implements IOrderService {
 
         // 1. Initialize a table with the number of customers
         const initializeTable = await axios.post(`${API_DINING_BASE}/tableOrders`, {
-            tableNumber: Number(order.tableId),
+            tableNumber: Number(order.chevaletId),
             customersCount: order.customerCount,
         });
 
-        console.log(`[OrderService] Initialized table ${order.tableId} for order ${order._id}`);
+        console.log(`[OrderService] Initialized table ${order.chevaletId} for order ${order._id}`);
 
         console.log(`[OrderService] Order initialized:`, initializeTable.data);
 
