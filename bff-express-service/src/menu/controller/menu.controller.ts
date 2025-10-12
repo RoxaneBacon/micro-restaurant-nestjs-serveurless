@@ -26,10 +26,10 @@ const router = Router();
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/", (req: Request, res: Response) => {
-    console.log('[MenuController] GET / - Fetching all menu items');
+    console.log('[MenuController/menu] Chargement du menu complet');
     const dishDtos = MenuService.getMenu();
     dishDtos.then((dishDtos: DishDto[]) => {
-        console.log(`[MenuController] Successfully retrieved ${dishDtos.length} menu items`);
+        console.log(`[MenuController/menu] Menu chargé avec succès - ${dishDtos.length} plats disponibles`);
         res.json(dishDtos);
     })
 });
@@ -56,7 +56,7 @@ router.get("/", (req: Request, res: Response) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/categories", (req: Request, res: Response) => {
-    console.log('[MenuController] GET /categories - Fetching all categories');
+    console.log('[MenuController/menu/categories] Récupération des catégories du menu');
     res.json(MenuService.getCategories());
 });
 
@@ -82,7 +82,7 @@ router.get("/categories", (req: Request, res: Response) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/allergens", (req: Request, res: Response) => {
-    console.log('[MenuController] GET /allergens - Fetching all allergens');
+    console.log('[MenuController/menu/allergens] Récupération de la liste des allergènes');
     res.json(MenuService.getAllergens());
 });
 
@@ -114,14 +114,14 @@ router.get("/allergens", (req: Request, res: Response) => {
  */
 router.get("/:id", (req: Request, res: Response) => {
     const id = req.params.id;
-    console.log(`[MenuController] GET /${id} - Fetching menu item by id`);
+    console.log(`[MenuController/menu/:id] Recherche du plat avec l'ID: ${id}`);
     const item = MenuService.getItemById(req.params.id);
     item.then((value: DishDto | undefined) => {
         if (!value) {
-            console.log(`[MenuController] Menu item with id ${id} not found`);
+            console.log(`[MenuController/menu/:id] Plat avec l'ID ${id} introuvable`);
             return res.status(404).json({message: "Menu item not found"});
         }
-        console.log(`[MenuController] Successfully retrieved menu item with id ${id}`);
+        console.log(`[MenuController/menu/:id] Plat trouvé: ${value.shortName}`);
         res.json(value);
     })
 });
