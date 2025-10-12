@@ -22,7 +22,7 @@ class OrderService implements IOrderService {
     partialPaymentStorage: PartialPaymentMap = {};
 
     async createOrder(order: OrderDto) {
-        console.log(`[OrderService] Creating order with id: ${order._id}`);
+        console.log(`[OrderService.createOrder] Initialisation de la table ${order.chevaletId} pour ${order.customerCount} clients`);
 
         // 1. Initialize a table with the number of customers
         const initializeTable = await axios.post(`${API_DINING_BASE}/tableOrders`, {
@@ -30,43 +30,39 @@ class OrderService implements IOrderService {
             customersCount: order.customerCount,
         });
 
-        console.log(`[OrderService] Initialized table ${order.chevaletId} for order ${order._id}`);
+        console.log(`[OrderService.createOrder] Ajout de ${order.items.length} articles à la commande de table`);
 
-        console.log(`[OrderService] Order initialized:`, initializeTable.data);
-
-        // 3. Add the items to the tableOrder
+        // 2. Add the items to the tableOrder
         const tableOrder: TableOrderDto = initializeTable.data;
         for (const item of order.items) {
-            console.log(`[OrderService] Adding item ${item._id} to order ${tableOrder._id}`);
-
-            const reponse = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
+            await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
                 menuItemId: item._mongoId,
                 menuItemShortName: item.dish.shortName,
                 howMany: item.quantity,
                 ingredients: item.dish.ingredients,
             });
         }
-        console.log(`[OrderService] All items added to table order ${tableOrder._id}`);
+        console.log(`[OrderService.createOrder] Commande de table prête - ID: ${tableOrder._id}`);
         return tableOrder._id;
     }
 
     tryToBillFullOrder(order: OrderDto): Promise<boolean> {
         const orderId = order._id;
+        console.log(`[OrderService.tryToBillFullOrder] Vérification si la commande ${orderId} est entièrement payée`);
+
         // 1. vérifier si les paiements partiels couvrent toute la commande selon ce qui stocké en mémoire
         if (!this.isOrderFullyPaid(order)) {
             // 2. si non, retourner false
-            console.log(`[OrderService] Order ${orderId} is not fully paid yet.`);
+            console.log(`[OrderService.tryToBillFullOrder] La commande ${orderId} a des paiements en attente`);
             return Promise.resolve(false);
         }
         // 3. si oui, appeler l'API pour payer la commande entière
-        console.log(
-            `[OrderService] Order ${orderId} is fully paid. Proceeding to pay the order.`,
-        );
+        console.log(`[OrderService.tryToBillFullOrder] Paiements de la commande ${orderId} vérifiés - Traitement de la facturation finale`);
         try {
             this.payOrder(orderId);
             return Promise.resolve(true);
         } catch (error) {
-            throw new Error(`Failed to pay for order ${orderId}: ${error}`);
+            throw new Error(`Échec du paiement pour la commande ${orderId}: ${error}`);
         }
     }
 
@@ -82,7 +78,6 @@ class OrderService implements IOrderService {
     }
 
     private isItemFullyPaid(orderId: string, item: OrderItemDto): boolean {
-        console.log(`Checking if item ${item._id} in order ${orderId} is fully paid.`);
         const itemPayments = this.partialPaymentStorage[orderId][item._id];
         if (!itemPayments) return false;
         const itemPrice = this.calculateOrderItemPrice(item.dish, item.quantity);
@@ -95,21 +90,21 @@ class OrderService implements IOrderService {
 
     payOrderPart(order: OrderDto, itemId: string, payment: OrderItemPayment, sharedBy: number): OrderDto {
         const orderId = order._id;
-        console.log(`[OrderService] Paying part of order item ${itemId} in order ${orderId}`);
         const item: OrderItemDto | undefined = order.items.find((i) => i._id === itemId);
         if (!item) {
-            console.error(`Order item with ID ${itemId} not found`);
+            console.error(`[OrderService.payOrderPart] Article ${itemId} introuvable dans la commande`);
             return order;
         }
         if (!this.partialPaymentStorage[orderId]) {
             this.partialPaymentStorage[orderId] = {};
         }
         if (!this.partialPaymentStorage[orderId][itemId]) {
-            console.log(`Creating new payment record for item ${itemId} in order ${orderId}`);
+            const itemPrice = this.calculateOrderItemPrice(item.dish, item.quantity);
+            console.log(`[OrderService.payOrderPart] Article ${item.dish.shortName} - Total: €${itemPrice}, Partagé par: ${sharedBy}`);
             this.partialPaymentStorage[orderId][itemId] = {
                 sharedBy,
                 payments: [],
-                price: this.calculateOrderItemPrice(item.dish, item.quantity),
+                price: itemPrice,
             };
         }
         this.partialPaymentStorage[orderId][itemId].payments.push(payment);
@@ -120,6 +115,7 @@ class OrderService implements IOrderService {
         item.sharedBy = sharedBy;
         item.leftToPay =
             item.price - item.payments.reduce((acc, p) => acc + p.amount, 0);
+        console.log(`[OrderService.payOrderPart] Paiement enregistré - Restant à payer: €${item.leftToPay}`);
         return order;
     }
 
@@ -134,19 +130,20 @@ class OrderService implements IOrderService {
     }
 
     private async startOrderPreparation(tableOrderId: string) {
-        console.log(`[OrderService] Starting order preparation for table order id: ${tableOrderId}`);
+        console.log(`[OrderService.startOrderPreparation] Démarrage de la préparation en cuisine pour la commande ${tableOrderId}`);
         const response = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrderId}/prepare`);
         return response.data as PreparationDto;
     }
 
     private async payOrder(tableOrderId: string) {
-        console.log(`[OrderService] Paying order with id: ${tableOrderId}`);
+        console.log(`[OrderService.payOrder] Traitement du paiement final pour la commande ${tableOrderId}`);
 
         // Start the preparation of the order
         await this.startOrderPreparation(tableOrderId);
 
         // Pay the order
         const response = await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrderId}/bill`);
+        console.log(`[OrderService.payOrder] Commande ${tableOrderId} facturée avec succès et envoyée en cuisine`);
         return response.data as TableOrderDto;
     }
 }
