@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import axios from "axios";
-import {OrderDto, OrderItemDto} from "../dto/order.dto";
-import {TableOrderDto} from "../dto/table-order.dto";
-import {PreparationDto} from "../dto/preparation.dto";
-import {IOrderService} from "../interface/IOrderService";
-import { OrderItemPayment } from "../dto/order-item-payment.dto";
-import {DishDto} from "../../menu/dto/dish.dto";
+import { OrderDto, OrderItemDto } from "../dto/order.dto";
+import { TableOrderDto } from "../dto/table-order.dto";
+import { PreparationDto } from "../dto/preparation.dto";
+import { IOrderService } from "../interface/IOrderService";
+import { OrderItemPayment, OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
+import { DishDto } from "../../menu/dto/dish.dto";
 
 dotenv.config()
 const API_DINING_BASE = process.env.GATEWAY_SERVICE_URL! + process.env.GATEWAY_DINING_SERVICE_URL;
@@ -88,34 +88,40 @@ class OrderService implements IOrderService {
         return totalPaid >= itemPrice;
     }
 
-    payOrderPart(order: OrderDto, itemId: string, payment: OrderItemPayment, sharedBy: number): OrderDto {
+    payOrderPart(order: OrderDto, paymentSavingList: OrderItemPaymentSaving[]): OrderDto {
+        console.log(`[OrderServiceWorkflow] Enregistrement de paiements de ${paymentSavingList.length} items`);
+        for (const payment of paymentSavingList) {                
+            order = this.saveAPayment(order, payment);
+        }
+        return order;
+    }
+
+    private saveAPayment(order: OrderDto, paymentSave: OrderItemPaymentSaving): OrderDto {
+        console.log(`[OrderService.payOrderPart] Enregistrement d'un paiement local pour l'item ${paymentSave.payment._id} d'un montant de ${paymentSave.payment.amount}€`);
         const orderId = order._id;
-        const item: OrderItemDto | undefined = order.items.find((i) => i._id === itemId);
+        const sharedBy = paymentSave.sharedBy;
+        const payment = paymentSave.payment;
+        const itemId = payment._id;
+        const item = order.items.find((i) => i._id === itemId);
         if (!item) {
-            console.error(`[OrderService.payOrderPart] Article ${itemId} introuvable dans la commande`);
-            return order;
+            console.error(`[OrderService.payOrderPart] Item ${itemId} non trouvé`);
+            throw new Error(`Item ${itemId} non trouvé dans la commande ${orderId}`);
         }
         if (!this.partialPaymentStorage[orderId]) {
             this.partialPaymentStorage[orderId] = {};
         }
         if (!this.partialPaymentStorage[orderId][itemId]) {
-            const itemPrice = this.calculateOrderItemPrice(item.dish, item.quantity);
-            console.log(`[OrderService.payOrderPart] Article ${item.dish.shortName} - Total: €${itemPrice}, Partagé par: ${sharedBy}`);
             this.partialPaymentStorage[orderId][itemId] = {
                 sharedBy,
                 payments: [],
-                price: itemPrice,
-            };
+                price: this.calculateOrderItemPrice(item.dish, item.quantity)
+            }
         }
         this.partialPaymentStorage[orderId][itemId].payments.push(payment);
-        payment.timestamp = new Date().toISOString();
-        payment.status = "COMPLETED";
         item.payments = item.payments || [];
         item.payments.push(payment);
         item.sharedBy = sharedBy;
-        item.leftToPay =
-            item.price - item.payments.reduce((acc, p) => acc + p.amount, 0);
-        console.log(`[OrderService.payOrderPart] Paiement enregistré - Restant à payer: €${item.leftToPay}`);
+        item.leftToPay = item.price - item.payments.reduce((acc, p) => acc + p.amount, 0);
         return order;
     }
 
