@@ -18,21 +18,32 @@ export class MenuProxyService {
 
   private _menuItemsByShortName: Map<string, MenuItem> = null;
 
-  constructor(private configService: ConfigService, private readonly httpService: HttpService) {
-    const dependenciesConfig = this.configService.get<DependenciesConfig>('dependencies');
+  constructor(
+    private configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {
+    const dependenciesConfig =
+      this.configService.get<DependenciesConfig>('dependencies');
     this._baseUrl = `http://${dependenciesConfig.menu_service_url_with_port}`;
   }
 
   private async retrieveFullMenu() {
     if (this._menuItemsByShortName === null) {
-      const retrieveFullMenuCallResponse: AxiosResponse<MenuItem[]> = await firstValueFrom(this.httpService.get(`${this._baseUrl}${this._menusPath}`));
-      this._menuItemsByShortName = _keyBy(retrieveFullMenuCallResponse.data, 'shortName');
+      const retrieveFullMenuCallResponse: AxiosResponse<MenuItem[]> =
+        await firstValueFrom(
+          this.httpService.get(`${this._baseUrl}${this._menusPath}`),
+        );
+      this._menuItemsByShortName = _keyBy(
+        retrieveFullMenuCallResponse.data,
+        'shortName',
+      );
     }
   }
 
   async findByShortName(menuItemShortName: string): Promise<OrderingItem> {
     await this.retrieveFullMenu();
-    let menuItem: MenuItem = this._menuItemsByShortName[menuItemShortName] || null;
+    let menuItem: MenuItem =
+      this._menuItemsByShortName[menuItemShortName] || null;
 
     let orderingItem: OrderingItem = null;
 

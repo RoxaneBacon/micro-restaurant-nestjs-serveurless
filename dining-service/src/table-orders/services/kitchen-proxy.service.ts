@@ -16,21 +16,39 @@ export class KitchenProxyService {
 
   private _preparationsPath = '/preparations';
 
-  constructor(private configService: ConfigService, private readonly httpService: HttpService) {
-    const dependenciesConfig = this.configService.get<DependenciesConfig>('dependencies');
+  constructor(
+    private configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {
+    const dependenciesConfig =
+      this.configService.get<DependenciesConfig>('dependencies');
     this._baseUrl = `http://${dependenciesConfig.kitchen_service_url_with_port}`;
   }
 
-  async sendItemsToCook(tableNumber: number, orderingLines: OrderingLine[]): Promise<PreparationDto[]> {
-    const itemsToBeCooked: ItemToBeCookedDto[] = orderingLines.map((orderingLine) => (ItemToBeCookedDto.itemToBeCookedDtoFactory(orderingLine)));
+  async sendItemsToCook(
+    tableNumber: number,
+    orderingLines: OrderingLine[],
+  ): Promise<PreparationDto[]> {
+    const itemsToBeCooked: ItemToBeCookedDto[] = orderingLines.map(
+      (orderingLine) =>
+        ItemToBeCookedDto.itemToBeCookedDtoFactory(orderingLine),
+    );
     try {
       const preparationRequest = {
         tableNumber,
         itemsToBeCooked,
       };
-      const sendItemsToCookCallResponse: AxiosResponse<PreparationDto[]> = await firstValueFrom(this.httpService.post(`${this._baseUrl}${this._preparationsPath}`, preparationRequest));
+      const sendItemsToCookCallResponse: AxiosResponse<PreparationDto[]> =
+        await firstValueFrom(
+          this.httpService.post(
+            `${this._baseUrl}${this._preparationsPath}`,
+            preparationRequest,
+          ),
+        );
 
-      return sendItemsToCookCallResponse.data.map((preparation) => PreparationDto.kitchenPreparationToPreparationDtoFactory(preparation));
+      return sendItemsToCookCallResponse.data.map((preparation) =>
+        PreparationDto.kitchenPreparationToPreparationDtoFactory(preparation),
+      );
     } catch (e) {
       /* istanbul ignore next */
       console.error('Error happened');

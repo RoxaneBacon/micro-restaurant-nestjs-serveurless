@@ -24,7 +24,8 @@ import { TableOrderAlreadyBilledException } from '../exceptions/table-order-alre
 @Injectable()
 export class TableOrdersService {
   constructor(
-    @InjectModel(TableOrder.name) private tableOrderModel: Model<TableOrderDocument>,
+    @InjectModel(TableOrder.name)
+    private tableOrderModel: Model<TableOrderDocument>,
     private readonly tablesService: TablesService,
     private readonly menuProxyService: MenuProxyService,
     private readonly kitchenProxyService: KitchenProxyService,
@@ -35,7 +36,9 @@ export class TableOrdersService {
   }
 
   async findOne(tableOrderId: string): Promise<TableOrder> {
-    const foundItem = await this.tableOrderModel.findOne({ _id: tableOrderId }).lean();
+    const foundItem = await this.tableOrderModel
+      .findOne({ _id: tableOrderId })
+      .lean();
 
     if (foundItem === null) {
       throw new TableOrderIdNotFoundException(tableOrderId);
@@ -45,7 +48,9 @@ export class TableOrdersService {
   }
 
   async startOrdering(startOrderingDto: StartOrderingDto): Promise<TableOrder> {
-    const table: Table = await this.tablesService.takeTable(startOrderingDto.tableNumber);
+    const table: Table = await this.tablesService.takeTable(
+      startOrderingDto.tableNumber,
+    );
 
     const tableOrder: TableOrder = new TableOrder();
     tableOrder.tableNumber = table.number;
@@ -55,14 +60,21 @@ export class TableOrdersService {
     return await this.tableOrderModel.create(tableOrder);
   }
 
-  async addOrderingLineToTableOrder(tableOrderId: string, addMenuItemDto: AddMenuItemDto): Promise<TableOrder> {
+  async addOrderingLineToTableOrder(
+    tableOrderId: string,
+    addMenuItemDto: AddMenuItemDto,
+  ): Promise<TableOrder> {
     const tableOrder: TableOrder = await this.findOne(tableOrderId);
 
     if (tableOrder.billed !== null) {
       throw new TableOrderAlreadyBilledException(tableOrder);
     }
 
-    const orderingItem: OrderingItem = await this.menuProxyService.findByShortName(addMenuItemDto.menuItemShortName);
+    const orderingItem: OrderingItem =
+      await this.menuProxyService.findByShortName(
+        addMenuItemDto.menuItemShortName,
+      );
+    orderingItem.ingredients = addMenuItemDto.ingredients;
 
     if (orderingItem === null) {
       throw new AddMenuItemDtoNotFoundException(addMenuItemDto);
@@ -72,9 +84,33 @@ export class TableOrdersService {
       throw new AddMenuItemDtoNotFoundException(addMenuItemDto);
     }
 
+    // Helper function to compare ingredients
+    const ingredientsMatch = (
+      ingredients1: any[],
+      ingredients2: any[],
+    ): boolean => {
+      if (ingredients1.length !== ingredients2.length) return false;
+
+      const sorted1 = ingredients1.sort((a, b) => a._id.localeCompare(b._id));
+      const sorted2 = ingredients2.sort((a, b) => a._id.localeCompare(b._id));
+
+      return sorted1.every((ing1, index) => {
+        const ing2 = sorted2[index];
+        return (
+          ing1._id === ing2._id &&
+          ing1.quantity === ing2.quantity &&
+          JSON.stringify(ing1.ingredient) === JSON.stringify(ing2.ingredient)
+        );
+      });
+    };
+
     const alreadyOrderedLinesIndexes = [];
     tableOrder.lines.forEach((line, index) => {
-      if (!line.sentForPreparation && line.item._id === orderingItem._id) {
+      if (
+        !line.sentForPreparation &&
+        line.item._id === orderingItem._id &&
+        ingredientsMatch(line.item.ingredients, addMenuItemDto.ingredients)
+      ) {
         alreadyOrderedLinesIndexes.push(index);
       }
     });
@@ -82,8 +118,11 @@ export class TableOrdersService {
     if (alreadyOrderedLinesIndexes.length > 0) {
       const orderingLineIndex = alreadyOrderedLinesIndexes[0];
       tableOrder.lines[orderingLineIndex].howMany += addMenuItemDto.howMany;
-
-      return this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, { returnDocument: 'after' });
+      return this.tableOrderModel.findByIdAndUpdate(
+        tableOrder._id,
+        tableOrder,
+        { returnDocument: 'after' },
+      );
     }
 
     const orderingLine: OrderingLine = new OrderingLine();
@@ -97,39 +136,55 @@ export class TableOrdersService {
     );
   }
 
-  async manageOrderingLines(tableNumber: number, orderingLines: OrderingLine[]): Promise<OrderingLinesWithPreparations> {
-    let orderingLinesToSend: OrderingLine[] = [];
+  async manageOrderingLines(
+    tableNumber: number,
+    orderingLines: OrderingLine[],
+  ): Promise<OrderingLinesWithPreparations> {
+    const orderingLinesToSend: OrderingLine[] = [];
 
-    const newOrderingLines: OrderingLine[] = orderingLines.map((orderingLine) => {
-      if (!orderingLine.sentForPreparation) {
-        orderingLinesToSend.push(orderingLine);
-        orderingLine.sentForPreparation = true;
-      }
+    const newOrderingLines: OrderingLine[] = orderingLines.map(
+      (orderingLine) => {
+        if (!orderingLine.sentForPreparation) {
+          orderingLinesToSend.push(orderingLine);
+          orderingLine.sentForPreparation = true;
+        }
 
-      return orderingLine;
-    });
+        return orderingLine;
+      },
+    );
 
-    const preparations: PreparationDto[] = await this.kitchenProxyService.sendItemsToCook(tableNumber, orderingLinesToSend);
+    const preparations: PreparationDto[] =
+      await this.kitchenProxyService.sendItemsToCook(
+        tableNumber,
+        orderingLinesToSend,
+      );
 
     return {
       orderingLines: newOrderingLines,
       preparations,
     };
-  };
+  }
 
-  async sendItemsForPreparation(tableOrderId: string): Promise<PreparationDto[]> {
+  async sendItemsForPreparation(
+    tableOrderId: string,
+  ): Promise<PreparationDto[]> {
     const tableOrder: TableOrder = await this.findOne(tableOrderId);
 
     if (tableOrder.billed !== null) {
       throw new TableOrderAlreadyBilledException(tableOrder);
     }
 
-    const managedLines: OrderingLinesWithPreparations = await this.manageOrderingLines(tableOrder.tableNumber, tableOrder.lines);
+    const managedLines: OrderingLinesWithPreparations =
+      await this.manageOrderingLines(tableOrder.tableNumber, tableOrder.lines);
 
     tableOrder.lines = managedLines.orderingLines;
-    tableOrder.preparations = tableOrder.preparations.concat(managedLines.preparations);
+    tableOrder.preparations = tableOrder.preparations.concat(
+      managedLines.preparations,
+    );
 
-    await this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, { returnDocument: 'after' });
+    await this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, {
+      returnDocument: 'after',
+    });
 
     return managedLines.preparations;
   }
@@ -148,6 +203,8 @@ export class TableOrdersService {
     // TODO: Move next line when billing is managed
     await this.tablesService.releaseTable(tableOrder.tableNumber);
 
-    return this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, { returnDocument: 'after' });
+    return this.tableOrderModel.findByIdAndUpdate(tableOrder._id, tableOrder, {
+      returnDocument: 'after',
+    });
   }
 }
