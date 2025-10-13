@@ -1,8 +1,8 @@
-import {Router, Request, Response} from "express";
+import { Router, Request, Response } from "express";
 import OrderService from "../service/order.service";
-import {handlePromiseError} from "../../utils/handlePromiseError";
-import {OrderDto} from "../dto/order.dto";
-import {OrderItemPayment} from "../dto/order-item-payment.dto";
+import { handlePromiseError } from "../../utils/handlePromiseError";
+import { OrderDto } from "../dto/order.dto";
+import { OrderItemPayment, OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
 
 const router = Router();
 
@@ -133,16 +133,15 @@ router.post("/pay", (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/payment-item/:itemId", (req: Request, res: Response) => {
-    const itemId = req.params.itemId;
-    const {orderDto, payment}: {orderDto: OrderDto, payment: OrderItemPayment} = req.body;
-    console.log(`[OrderController/order/payment-item/:itemId] Traitement du paiement partiel - Commande: ${orderDto._id}, Article: ${itemId}, Montant: €${payment.amount}`);
+router.post("/payment", (req: Request, res: Response) => {
+    const { orderDto, paymentList }: { orderDto: OrderDto, paymentList: OrderItemPaymentSaving[] } = req.body;
+    console.log(`[OrderController/order/payment] Traitement du paiement partiel - Commande: ${orderDto._id}`);
     try {
-        const order = OrderService.payOrderPart(orderDto, itemId, payment, orderDto.customerCount)
-        console.log(`[OrderController/order/payment-item/:itemId] Paiement partiel enregistré pour l'article ${itemId}`);
+        let order = orderDto;
+        order = OrderService.payOrderPart(order, paymentList);
+        console.log(`[OrderController/order/payment] Paiement(s) partiel(s) enregistré(s) pour la commande ${order._id}`);
         res.status(200).json(order);
     } catch (error) {
-        console.error(`[OrderController/order/payment-item/:itemId] Échec du paiement partiel pour l'article ${itemId}`);
         handlePromiseError(res, "OrderController.payOrderPart");
     }
 });

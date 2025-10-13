@@ -1,5 +1,5 @@
 import {OrderDto} from "../dto/order.dto";
-import {OrderItemPayment} from "../dto/order-item-payment.dto";
+import {OrderItemPayment, OrderItemPaymentSaving} from "../dto/order-item-payment.dto";
 
 export interface IOrderService {
     createOrder(order: OrderDto): Promise<string | null>;
@@ -17,5 +17,5 @@ export interface IOrderService {
      * @param payment
      * @param sharedBy
      */
-    payOrderPart(order: OrderDto, itemId: string, payment: OrderItemPayment, sharedBy: number): OrderDto;
+    payOrderPart(order: OrderDto, paymentSavingList: OrderItemPaymentSaving[]): OrderDto;
 }

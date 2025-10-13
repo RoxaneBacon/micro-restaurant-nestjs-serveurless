@@ -20,7 +20,7 @@ describe("handlePromiseError", () => {
             isAxiosError: true,
             response: {
                 status: 404,
-                data: {error: "TableNotFound", details: "No available table"},
+                data: {error: "TableNotFound", message: "No available table"},
             },
             message: "Not Found",
         };

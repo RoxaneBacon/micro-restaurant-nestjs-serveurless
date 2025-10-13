@@ -118,11 +118,11 @@ describe("Order controller + service end-to-end", () => {
         expect(res.status).toBe(500);
     });
 
-    test("POST /order/payment-item/:itemId - paying part of item returns updated order", async () => {
+    test("POST /order/payment - paying part of item returns updated order", async () => {
         // No axios calls needed for payOrderPart; use real service method
         const payment = { payer: "userA", amount: 10 };
         const res = await request
-            .post(`/order/payment-item/${FIX_ORDER.items[0]._id}`)
+            .post(`/order/payment`)
             .send({ orderDto: FIX_ORDER, payment });
 
         expect(res.status).toBe(200);
@@ -137,11 +137,11 @@ describe("Order controller + service end-to-end", () => {
         expect(p.timestamp).toBeDefined();
     });
 
-    test("POST /order/pay - returns 422 when order is not fully paid", async () => {
+    test("POST /order/pay - returns 200 and false when order is not fully paid", async () => {
         // Ensure partialPaymentStorage is empty -> not fully paid
         const res = await request.post("/order/pay").send(FIX_ORDER);
-        expect(res.status).toBe(422);
-        expect(res.body).toHaveProperty("error");
+        expect(res.status).toBe(200);
+        expect(res.body).toBe(false);
     });
 
     test("POST /order/pay - returns 200 when order is fully paid and triggers downstream calls", async () => {

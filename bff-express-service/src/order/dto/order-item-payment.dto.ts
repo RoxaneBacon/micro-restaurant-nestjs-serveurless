@@ -27,3 +27,23 @@ export interface OrderItemPayment {
     amount: number
     status: 'PENDING' | 'COMPLETED' | 'FAILED'
 }
+
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *   OrderItemPaymentSaving:
+ *    type: object
+ *   required:
+ *    - payment
+ *   - sharedBy
+ *  properties:
+ *   payment:
+ *    $ref: '#/components/schemas/OrderItemPayment'
+ *  sharedBy:
+ *   type: number
+ */
+export interface OrderItemPaymentSaving{
+    payment: OrderItemPayment;
+    sharedBy: number;
+}
