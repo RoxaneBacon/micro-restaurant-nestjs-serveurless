@@ -1,8 +1,8 @@
 import {CategoryDto} from "../../menu/dto/category.dto";
 
 export const categories: CategoryDto[] = [
-  { _id: '1', name: 'STARTER' },
-  { _id: '2', name: 'MAIN' },
-  { _id: '3', name: 'DESSERT' },
-  { _id: '4', name: 'BEVERAGE' },
-];
+    { _id: '1', name: 'STARTER', displayName: 'Entrées' },
+    { _id: '2', name: 'MAIN', displayName: 'Plats' },
+    { _id: '3', name: 'DESSERT', displayName: 'Desserts' },
+    { _id: '4', name: 'BEVERAGE', displayName: 'Boissons' },
+]

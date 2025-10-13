@@ -26,8 +26,11 @@ export type CategoryName = 'STARTER' | 'MAIN' | 'DESSERT' | 'BEVERAGE';
  *           type: string
  *         name:
  *           $ref: '#/components/schemas/CategoryName'
+ *         displayName:
+ *           type: string
  */
 export interface CategoryDto {
-  _id: string;
-  name: CategoryName;
+    _id: string
+    name: CategoryName
+    displayName: string
 }
