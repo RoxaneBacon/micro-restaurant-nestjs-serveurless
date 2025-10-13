@@ -1,8 +1,8 @@
-import {Router, Request, Response} from "express";
+import { Router, Request, Response } from "express";
 import OrderService from "../service/order.service";
-import {handlePromiseError} from "../../utils/handlePromiseError";
-import {OrderDto} from "../dto/order.dto";
-import {OrderItemPayment, OrderItemPaymentSaving} from "../dto/order-item-payment.dto";
+import { handlePromiseError } from "../../utils/handlePromiseError";
+import { OrderDto } from "../dto/order.dto";
+import { OrderItemPayment, OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
 
 const router = Router();
 
@@ -134,7 +134,7 @@ router.post("/pay", (req: Request, res: Response) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.post("/payment", (req: Request, res: Response) => {
-    const {orderDto, paymentList}: {orderDto: OrderDto, paymentList: OrderItemPaymentSaving[]} = req.body;
+    const { orderDto, paymentList }: { orderDto: OrderDto, paymentList: OrderItemPaymentSaving[] } = req.body;
     console.log(`[OrderController/order/payment] Traitement du paiement partiel - Commande: ${orderDto._id}`);
     try {
         let order = orderDto;
@@ -142,7 +142,6 @@ router.post("/payment", (req: Request, res: Response) => {
         console.log(`[OrderController/order/payment] Paiement(s) partiel(s) enregistré(s) pour la commande ${order._id}`);
         res.status(200).json(order);
     } catch (error) {
-        // console.error(`[OrderController/order/payment] Échec du paiement partiel pour l'article ${p.payment._id}`);
         handlePromiseError(res, "OrderController.payOrderPart");
     }
 });
