@@ -5,4 +5,5 @@ export const categories: CategoryDto[] = [
     { _id: '2', name: 'MAIN', displayName: 'Plats' },
     { _id: '3', name: 'DESSERT', displayName: 'Desserts' },
     { _id: '4', name: 'BEVERAGE', displayName: 'Boissons' },
+    { _id: '5', name: 'GROUPMENU', displayName: 'Menu du groupe' }
 ]
