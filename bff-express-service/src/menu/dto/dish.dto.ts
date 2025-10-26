@@ -67,6 +67,9 @@ export interface DishItemDto {
  *         - price
  *         - allergens
  *         - ingredients
+ *         - extraPrice
+ *         - offeredAmount
+ *         - priceToPay
  *       properties:
  *         _id:
  *           type: string
@@ -81,6 +84,7 @@ export interface DishItemDto {
  *         price:
  *           type: number
  *           format: float
+ *           description: "Prix UNIQUEMENT du plat sans extra ni réduction"
  *         allergens:
  *           type: array
  *           items:
@@ -92,15 +96,18 @@ export interface DishItemDto {
  *         image:
  *           type: string
  *           nullable: true
- *        extraPrice:
+ *         extraPrice:
  *           type: number
  *           format: float
- *        offeredAmount:
+ *           description: "Somme des extras ajoutés au plat"
+ *         offeredAmount:
  *           type: number
  *           format: float
- *        priceToPay:
+ *           description: "Somme offerte (menu incluant des plats)"
+ *         priceToPay:
  *           type: number
  *           format: float
+ *           description: "Prix à payer = price + extraPrice - offeredAmount"
  */
 export interface DishDto {
     _id: string

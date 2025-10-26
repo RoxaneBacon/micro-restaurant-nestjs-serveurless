@@ -15,7 +15,7 @@ export function setupSwagger(app: Express): void {
                 info: {
                     title: "BFF Express Service API",
                     version: "1.0.0",
-                    description: "API documentation for Menu and Order services",
+                    description: "API documentation for Menu, Order and Group services",
                 },
                 components: {
                     responses: {
