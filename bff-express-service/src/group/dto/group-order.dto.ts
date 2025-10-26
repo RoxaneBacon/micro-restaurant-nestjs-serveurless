@@ -46,8 +46,9 @@ export interface GroupOrderDto {
     tableNumber: number
     expectedCustomers: number
     actualCustomers: number
+    menuUnitPrice: number
     menu: {
-        dishList: string[] // Liste des shortNames des plats inclus dans le menu
-        extraList: string[] // Nom des ingrédients en supplément inclus dans le menu
+        dishShortNameList: string[] // Liste des shortNames des plats inclus dans le menu
     }
+    status : 'READY' | 'IN_PROGRESS' | 'CLOSED'
 }
