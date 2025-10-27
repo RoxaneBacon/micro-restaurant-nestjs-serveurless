@@ -96,7 +96,7 @@ router.get("/:code/table", (req, res) => {
 /**
  * @openapi
  * /group/{code}/customers:
- *   post:
+ *   put:
  *     summary: Ajouter des clients au groupe
  *     tags:
  *       - Group
@@ -131,7 +131,7 @@ router.get("/:code/table", (req, res) => {
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       403:
- *         description: Plus de place dans le groupe ou groupe fermé
+ *         description: Groupe fermé
  *         content:
  *           application/json:
  *             schema:
@@ -142,7 +142,7 @@ router.get("/:code/table", (req, res) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/:code/customers", (req, res) => {
+router.put("/:code/customers", (req, res) => {
   const code = req.params.code;
   const count = Number((req.body as any)?.count);
   if (!Number.isInteger(count) || count <= 0) {
@@ -204,7 +204,7 @@ router.get("/:code/recap", (req, res) => {
 /**
  * @openapi
  * /group/{code}/pay:
- *   post:
+ *   put:
  *     summary: Payer et fermer le groupe
  *     tags:
  *       - Group
@@ -231,7 +231,7 @@ router.get("/:code/recap", (req, res) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/:code/pay", (req, res) => {
+router.put("/:code/pay", (req, res) => {
   try {
     groupService.pay(req.params.code);
     res.status(204).end();
