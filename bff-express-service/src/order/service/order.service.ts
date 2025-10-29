@@ -80,12 +80,11 @@ class OrderService implements IOrderService {
     private isItemFullyPaid(orderId: string, item: OrderItemDto): boolean {
         const itemPayments = this.partialPaymentStorage[orderId][item._id];
         if (!itemPayments) return false;
-        const itemPrice = this.calculateOrderItemPrice(item.dish, item.quantity);
         const totalPaid = itemPayments.payments.reduce(
             (sum: number, p) => sum + p.amount,
             0,
         );
-        return totalPaid >= itemPrice;
+        return totalPaid >= item.price;
     }
 
     payOrderPart(order: OrderDto, paymentSavingList: OrderItemPaymentSaving[]): OrderDto {
@@ -114,7 +113,7 @@ class OrderService implements IOrderService {
             this.partialPaymentStorage[orderId][itemId] = {
                 sharedBy,
                 payments: [],
-                price: this.calculateOrderItemPrice(item.dish, item.quantity)
+                price: item.price
             }
         }
         this.partialPaymentStorage[orderId][itemId].payments.push(payment);
@@ -123,16 +122,6 @@ class OrderService implements IOrderService {
         item.sharedBy = sharedBy;
         item.leftToPay = item.price - item.payments.reduce((acc, p) => acc + p.amount, 0);
         return order;
-    }
-
-    calculateOrderItemPrice(dish: DishDto, quantity: number) {
-        const extraCost = dish.ingredients.reduce((total, ingredient) => {
-            return ingredient.quantity === "extra"
-                ? total + ingredient.ingredient.extraCost
-                : total;
-        }, 0);
-        const unitPrice = dish.price + extraCost;
-        return unitPrice * quantity;
     }
 
     private async startOrderPreparation(tableOrderId: string) {
