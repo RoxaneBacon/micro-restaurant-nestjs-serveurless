@@ -7,8 +7,7 @@ class GroupService {
   groups: GroupOrderDto[] = MOCK_GROUP_LIST;
 
   doesGroupExist(code: string): boolean {
-    const group = this.getGroupByCodeAndVerifStatus(code);
-    return group !== undefined;
+    return this.groups.some(group => group._id === code);
   }
 
   getTableNumber(code: string): number {
