@@ -25,8 +25,7 @@ class GroupService {
   }
 
   doesGroupExist(code: string): boolean {
-    const group = this.getGroupByCodeAndVerifStatus(code);
-    return group !== undefined;
+    return this.groups.some(group => group._id === code);
   }
 
   getTableNumber(code: string): number {

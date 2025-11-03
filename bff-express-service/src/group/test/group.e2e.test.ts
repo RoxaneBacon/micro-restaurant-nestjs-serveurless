@@ -26,48 +26,48 @@ beforeEach(() => {
 });
 
 describe("GroupController - join", () => {
-  it("POST /group/:code/table-number -> 200 with group", async () => {
-    const res = await request.post("/group/123456/table-number");
+  it("GET /group/:code/table -> 200 with group", async () => {
+    const res = await request.get("/group/123456/table");
     expect(res.status).toBe(200);
     expect(res.body.tableNumber).toBe(10);
   });
 
-  it("POST /group/:code/table-number -> 404 when not found", async () => {
-    const res = await request.post("/group/unknown/table-number");
+  it("GET /group/:code/table -> 404 when not found", async () => {
+    const res = await request.get("/group/unknown/table");
     expect(res.status).toBe(404);
   });
 });
 
 describe("GroupController - add customers", () => {
-  it("POST /group/:code/customers -> 204 then price depends on expectedCustomers", async () => {
-    await request.post("/group/123456/customers").send({ count: 3 }).expect(204);
+  it("PUT /group/:code/customers -> 204 then price depends on expectedCustomers", async () => {
+    await request.put("/group/123456/customers").send({ count: 3 }).expect(204);
     const recap = await request.get("/group/123456/recap");
     expect(recap.status).toBe(200);
     expect(recap.body.actualCustomers).toBe(3);
     expect(recap.body.totalpriceToPay).toBe(4 * 25);
   });
 
-  it("POST /group/:code/customers -> 204 then price depends on actualCustomers", async () => {
-    await request.post("/group/123456/customers").send({ count: 1 }).expect(204);
+  it("PUT /group/:code/customers -> 204 then price depends on actualCustomers", async () => {
+    await request.put("/group/123456/customers").send({ count: 1 }).expect(204);
     const recap = await request.get("/group/123456/recap");
     expect(recap.status).toBe(200);
     expect(recap.body.actualCustomers).toBe(1);
     expect(recap.body.totalpriceToPay).toBe(1 * 25);
   });
 
-  it("POST /group/:code/customers -> 400 invalid count", async () => {
-    const res = await request.post("/group/123456/customers").send({ count: 0 });
+  it("PUT /group/:code/customers -> 400 invalid count", async () => {
+    const res = await request.put("/group/123456/customers").send({ count: 0 });
     expect(res.status).toBe(400);
   });
 
-  it("POST /group/:code/customers -> 403 when group closed", async () => {
-    await request.post("/group/654321/pay").expect(204);
-    const res = await request.post("/group/654321/customers").send({ count: 1 });
+  it("PUT /group/:code/customers -> 403 when group closed", async () => {
+    await request.put("/group/654321/pay").expect(204);
+    const res = await request.put("/group/654321/customers").send({ count: 1 });
     expect(res.status).toBe(403);
   });
 
-  it("POST /group/:code/customers -> 404 when group not found", async () => {
-    const res = await request.post("/group/doesnotexist/customers").send({ count: 1 });
+  it("PUT /group/:code/customers -> 404 when group not found", async () => {
+    const res = await request.put("/group/doesnotexist/customers").send({ count: 1 });
     expect(res.status).toBe(404);
   });
 });
@@ -86,16 +86,16 @@ describe("GroupController - recap", () => {
 });
 
 describe("GroupController - pay", () => {
-  it("POST /group/:code/pay -> 204 closes group", async () => {
-    const res = await request.post("/group/123456/pay");
+  it("PUT /group/:code/pay -> 204 closes group", async () => {
+    const res = await request.put("/group/123456/pay");
     expect(res.status).toBe(204);
     // subsequent action should be forbidden
-    const again = await request.post("/group/123456/pay");
+    const again = await request.put("/group/123456/pay");
     expect(again.status).toBe(403);
   });
 
-  it("POST /group/:code/pay -> 404 not found", async () => {
-    const res = await request.post("/group/unknown/pay");
+  it("PUT /group/:code/pay -> 404 not found", async () => {
+    const res = await request.put("/group/unknown/pay");
     expect(res.status).toBe(404);
   });
 });
@@ -125,7 +125,7 @@ describe("GroupController - dishes", () => {
   });
 
   it("GET /group/:code/dishes -> 403 closed", async () => {
-    await request.post("/group/654321/pay").expect(204);
+    await request.put("/group/654321/pay").expect(204);
     (menuService.getMenu as jest.Mock).mockResolvedValue([]);
     const res = await request.get("/group/654321/dishes");
     expect(res.status).toBe(403);
@@ -135,7 +135,7 @@ describe("GroupController - dishes", () => {
 describe("GroupController - scénario bout en bout sur un même groupe", () => {
   it("enchaîne join -> add -> recap -> add -> dépassement -> pay -> actions interdites", async () => {
     // 1) Join initial
-    const join1 = await request.post("/group/123456/table-number");
+    const join1 = await request.get("/group/123456/table");
     expect(join1.status).toBe(200);
     expect(join1.body.tableNumber).toBe(10);
 
@@ -146,7 +146,7 @@ describe("GroupController - scénario bout en bout sur un même groupe", () => {
     expect(recap0.body.totalpriceToPay).toBe(0);
 
     // 3) Ajout de 1 clients et recap
-    await request.post("/group/123456/customers").send({ count: 1 }).expect(204);
+    await request.put("/group/123456/customers").send({ count: 1 }).expect(204);
 
     const recap1 = await request.get("/group/123456/recap");
     expect(recap1.status).toBe(200);
@@ -154,7 +154,7 @@ describe("GroupController - scénario bout en bout sur un même groupe", () => {
     expect(recap1.body.totalpriceToPay).toBe(1 * 25); // unit price 25 avec 1 clients attendus
 
     // 4) Rajout de 4 clients supplémentaires et recap
-    await request.post("/group/123456/customers").send({ count: 4 }).expect(204);
+    await request.put("/group/123456/customers").send({ count: 4 }).expect(204);
 
     const recap5 = await request.get("/group/123456/recap");
     expect(recap5.status).toBe(200);
@@ -162,7 +162,7 @@ describe("GroupController - scénario bout en bout sur un même groupe", () => {
     expect(recap5.body.totalpriceToPay).toBe(4 * 25); // unit price 25 avec 4 clients attendus
 
     // 5) Rajout de 2 clients supplémentaires (dépassement de capacité autorisé) et recap
-    await request.post("/group/123456/customers").send({ count: 2 }).expect(204);
+    await request.put("/group/123456/customers").send({ count: 2 }).expect(204);
 
     const recap7 = await request.get("/group/123456/recap");
     expect(recap7.status).toBe(200);
@@ -171,10 +171,10 @@ describe("GroupController - scénario bout en bout sur un même groupe", () => {
 
 
     // 7) Paiement et fermeture
-    await request.post("/group/123456/pay").expect(204);
+    await request.put("/group/123456/pay").expect(204);
 
     // 8) Après fermeture: ajout clients interdit
-    const addAfterClose = await request.post("/group/123456/customers").send({ count: 1 });
+    const addAfterClose = await request.put("/group/123456/customers").send({ count: 1 });
     expect(addAfterClose.status).toBe(403);
 
     // 11) Après fermeture: dishes interdit (mocker le menu pour éviter un crash dans getMenu)
