@@ -128,6 +128,17 @@ router.post("/pay", (req: Request, res: Response) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/OrderDto'
+ *       422:
+ *         description: Unable to process payment (item not found in order)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 message:
+ *                   type: string
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
@@ -141,8 +152,12 @@ router.post("/payment", (req: Request, res: Response) => {
         order = OrderService.payOrderPart(order, paymentList);
         console.log(`[OrderController/order/payment] Paiement(s) partiel(s) enregistré(s) pour la commande ${order._id}`);
         res.status(200).json(order);
-    } catch (error) {
-        handlePromiseError(res, "OrderController.payOrderPart");
+    } catch (error: any) {
+        console.error(`[OrderController/order/payment] Erreur lors du traitement du paiement: ${error.message}`);
+        res.status(422).json({
+            error: "UnprocessableEntity",
+            message: error.message || "Impossible de traiter le paiement"
+        });
     }
 });
 

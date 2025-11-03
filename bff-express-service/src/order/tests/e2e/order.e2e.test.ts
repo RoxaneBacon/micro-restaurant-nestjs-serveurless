@@ -120,10 +120,18 @@ describe("Order controller + service end-to-end", () => {
 
     test("POST /order/payment - paying part of item returns updated order", async () => {
         // No axios calls needed for payOrderPart; use real service method
-        const payment = { payer: "userA", amount: 10 };
+        const paymentList = [{
+            payment: {
+                _id: FIX_ORDER.items[0]._id,
+                timestamp: new Date().toISOString(),
+                amount: 10,
+                status: "PENDING"
+            },
+            sharedBy: 1
+        }];
         const res = await request
             .post(`/order/payment`)
-            .send({ orderDto: FIX_ORDER, payment });
+            .send({ orderDto: FIX_ORDER, paymentList });
 
         expect(res.status).toBe(200);
         expect(res.body).toBeDefined();
@@ -133,8 +141,30 @@ describe("Order controller + service end-to-end", () => {
         expect(Array.isArray(returnedItem.payments)).toBe(true);
         const p = returnedItem.payments[0];
         expect(p.amount).toBe(10);
-        expect(p.status).toBe("COMPLETED");
+        expect(p.status).toBe("PENDING");
         expect(p.timestamp).toBeDefined();
+    });
+
+    test("POST /order/payment - returns 422 when item not found in order", async () => {
+        // Payment for an item that doesn't exist in the order
+        const paymentList = [{
+            payment: {
+                _id: "nonexistent-item-id",
+                timestamp: new Date().toISOString(),
+                amount: 10,
+                status: "PENDING"
+            },
+            sharedBy: 1
+        }];
+        const res = await request
+            .post(`/order/payment`)
+            .send({ orderDto: FIX_ORDER, paymentList });
+
+        expect(res.status).toBe(422);
+        expect(res.body).toBeDefined();
+        expect(res.body.error).toBe("UnprocessableEntity");
+        expect(res.body.message).toContain("nonexistent-item-id");
+        expect(res.body.message).toContain("non trouvé");
     });
 
     test("POST /order/pay - returns 200 and false when order is not fully paid", async () => {
