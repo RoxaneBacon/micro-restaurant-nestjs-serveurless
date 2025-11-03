@@ -2,9 +2,27 @@ import { GroupOrderRecapDto } from "../dto/group-order-recap.dto";
 import { GroupOrderDto } from "../dto/group-order.dto";
 import menuService from "../../menu/service/menu.service";
 import { MOCK_GROUP_LIST } from "../mock/group.mock";
+import axios from "axios";
+import {TableDto} from "../dto/table.dto";
 
 class GroupService {
   groups: GroupOrderDto[] = MOCK_GROUP_LIST;
+
+  constructor() {
+    this.initMockTableIds();
+  }
+
+  private initMockTableIds = async () => {
+    console.log('Getting all MongoDB IDs for groups');
+    for (let i = 0; i < MOCK_GROUP_LIST.length; i++) {
+        await axios.get(process.env.GATEWAY_SERVICE_URL! + process.env.GATEWAY_DINING_SERVICE_URL + '/tables/' + MOCK_GROUP_LIST[i].tableNumber).then(
+            (response) => {
+                const table: TableDto = response.data;
+                MOCK_GROUP_LIST[i].mongodbIdTable = table._id;
+            }
+        )
+    }
+  }
 
   doesGroupExist(code: string): boolean {
     const group = this.getGroupByCodeAndVerifStatus(code);

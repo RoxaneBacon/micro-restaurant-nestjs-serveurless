@@ -3,6 +3,7 @@ import { GroupOrderDto } from "../dto/group-order.dto";
 export const MOCK_GROUP_LIST: GroupOrderDto[] = [
   {
     _id: '123456',
+    mongodbIdTable: '',
     tableNumber: 10,
     expectedCustomers: 4,
     actualCustomers: 0,
@@ -14,6 +15,7 @@ export const MOCK_GROUP_LIST: GroupOrderDto[] = [
   },
   {
     _id: '654321',
+    mongodbIdTable: '',
     tableNumber: 11,
     expectedCustomers: 2,
     actualCustomers: 1,

@@ -43,6 +43,7 @@
  */
 export interface GroupOrderDto {
     _id: string //6 chiffres
+    mongodbIdTable: string,
     tableNumber: number
     expectedCustomers: number
     actualCustomers: number
