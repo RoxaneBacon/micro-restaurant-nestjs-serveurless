@@ -58,7 +58,7 @@ class GroupService {
 
   doesGroupExist(code: string): boolean {
     console.log(`[GroupOrderService.doesGroupExist] Vérification de l'existence du groupe avec le code : ${code}`);
-    return this.groups.some(group => group._id === code);
+    return this.groups.some(group => group._id === code && group.status !== 'CLOSED');
   }
 
   async getTableNumber(code: string): Promise<number> {
