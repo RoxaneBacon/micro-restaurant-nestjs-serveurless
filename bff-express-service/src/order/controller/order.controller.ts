@@ -72,8 +72,6 @@ router.post("/", (req: Request, res: Response) => {
     const isGroup: boolean = (req.query.isGroup === 'true') || false;
     const order: OrderDto = req.body.order;
     console.log(`[OrderController/order] Création d'une nouvelle commande pour la table ${order.chevaletId}`);
-    console.log(order)
-    console.log(`Is group order: ${isGroup}`);
     OrderService.createOrder(order, isGroup)
         .then(id => {
             console.log(`[OrderController/order] Commande créée avec succès - ID commande table: ${id}`);

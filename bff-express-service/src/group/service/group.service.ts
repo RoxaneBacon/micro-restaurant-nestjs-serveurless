@@ -99,7 +99,6 @@ class GroupService {
   async pay(code: string): Promise<void> {
     console.log(`[GroupOrderService.pay] Paiement final pour le groupe avec le code : ${code}`);
     const group = this.getGroupByCodeAndVerifStatus(code);
-    console.log('group: ', group);
     await this.payOrder(group.mongodbIdTable);
     group.status = 'CLOSED';
   }
