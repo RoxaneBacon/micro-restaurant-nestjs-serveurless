@@ -5,7 +5,7 @@ import { TableOrderDto } from "../dto/table-order.dto";
 import { PreparationDto } from "../dto/preparation.dto";
 import { IOrderService } from "../interface/IOrderService";
 import { OrderItemPayment, OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
-import { DishDto } from "../../menu/dto/dish.dto";
+import {TableDto} from "../dto/table.dto";
 
 dotenv.config()
 const API_DINING_BASE = process.env.GATEWAY_SERVICE_URL! + process.env.GATEWAY_DINING_SERVICE_URL;
@@ -21,19 +21,49 @@ type PartialPaymentMap = { [orderID: string]: OrderPaymentMap };
 class OrderService implements IOrderService {
     partialPaymentStorage: PartialPaymentMap = {};
 
-    async createOrder(order: OrderDto) {
-        console.log(`[OrderService.createOrder] Initialisation de la table ${order.chevaletId} pour ${order.customerCount} clients`);
 
-        // 1. Initialize a table with the number of customers
-        const initializeTable = await axios.post(`${API_DINING_BASE}/tableOrders`, {
+    /**
+     * If it's a group order, test that the table is already initialized if not initialize it
+     * If it's not a group order, always initialize the table
+     *
+     * @param order
+     * @param isGroup
+     */
+    private async handleTableInitialization(order: OrderDto, isGroup: boolean): Promise<TableOrderDto> {
+        if (isGroup) {
+            console.log(`[OrderService.handleTableInitialization] Commande de groupe détectée pour la table ${order.chevaletId} - Vérification de l'initialisation de la table`);
+
+            const tableResponse = await axios.get(`${API_DINING_BASE}/tables/${order.chevaletId}`);
+            const tableData: TableDto = tableResponse.data;
+
+            if (tableData.taken) {
+                console.log(`[OrderService.handleTableInitialization] La table ${order.chevaletId} est déjà initialisée - Récupération de l'ID de la commande existante`);
+                const orderResponse = await axios.get(`${API_DINING_BASE}/tableOrders/${tableData.tableOrderId}`);
+                return orderResponse.data as TableOrderDto;
+            }
+        } else {
+            console.log(`[OrderService.handleTableInitialization] Commande individuelle détectée pour la table ${order.chevaletId} - Initialisation de la table`);
+        }
+
+        // Common initialization logic for both non-taken group orders and individual orders
+        const initResponse = await axios.post(`${API_DINING_BASE}/tableOrders`, {
             tableNumber: Number(order.chevaletId),
             customersCount: order.customerCount,
         });
+        const tableOrder: TableOrderDto = initResponse.data;
+        console.log(`[OrderService.handleTableInitialization] La table ${order.chevaletId} a été initialisée avec succès - ID de la commande: ${tableOrder._id}`);
+        return tableOrder;
+    }
+
+    async createOrder(order: OrderDto, isGroup: boolean = false) {
+        console.log(`[OrderService.createOrder] Initialisation de la table ${order.chevaletId} pour ${order.customerCount} clients`);
+
+        // 1. Initialize a table with the number of customers
+        const tableOrder: TableOrderDto = await this.handleTableInitialization(order, isGroup);
 
         console.log(`[OrderService.createOrder] Ajout de ${order.items.length} articles à la commande de table`);
 
         // 2. Add the items to the tableOrder
-        const tableOrder: TableOrderDto = initializeTable.data;
         for (const item of order.items) {
             await axios.post(`${API_DINING_BASE}/tableOrders/${tableOrder._id}`, {
                 menuItemId: item._mongoId,

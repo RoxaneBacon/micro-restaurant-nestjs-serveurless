@@ -18,7 +18,7 @@ export const MOCK_GROUP_LIST: GroupOrderDto[] = [
     mongodbIdTable: '',
     tableNumber: 11,
     expectedCustomers: 2,
-    actualCustomers: 1,
+    actualCustomers: 0,
     menuUnitPrice: 30,
     menu: {
       dishShortNameList: ['Guacamole', 'Saumon fumé', 'Burger', 'Bolognese', 'Mousse Chocolat', 'Limonade', 'Jus de Pomme'],

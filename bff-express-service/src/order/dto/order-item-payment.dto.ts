@@ -31,17 +31,17 @@ export interface OrderItemPayment {
 /**
  * @openapi
  * components:
- *  schemas:
- *   OrderItemPaymentSaving:
- *    type: object
- *   required:
- *    - payment
- *   - sharedBy
- *  properties:
- *   payment:
- *    $ref: '#/components/schemas/OrderItemPayment'
- *  sharedBy:
- *   type: number
+ *   schemas:
+ *     OrderItemPaymentSaving:
+ *       type: object
+ *       required:
+ *         - payment
+ *         - sharedBy
+ *       properties:
+ *         payment:
+ *           $ref: '#/components/schemas/OrderItemPayment'
+ *         sharedBy:
+ *           type: number
  */
 export interface OrderItemPaymentSaving{
     payment: OrderItemPayment;
