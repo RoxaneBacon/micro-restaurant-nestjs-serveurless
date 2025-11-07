@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import OrderService from "../service/order.service";
 import { handlePromiseError } from "../../utils/handlePromiseError";
 import { OrderDto } from "../dto/order.dto";
-import { OrderItemPayment, OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
+import { OrderItemPaymentSaving } from "../dto/order-item-payment.dto";
 
 const router = Router();
 
@@ -18,23 +18,61 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/OrderDto'
+ *             type: object
+ *             required:
+ *               - chevaletId
+ *               - status
+ *               - items
+ *               - openedAt
+ *               - customerCount
+ *               - totalDishPrice
+ *               - totalExtraPrice
+ *               - totalOfferedAmount
+ *               - totalPriceToPay
+ *             properties:
+ *               chevaletId:
+ *                 type: number
+ *               status:
+ *                 $ref: '#/components/schemas/OrderStatus'
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/OrderItemDto'
+ *               openedAt:
+ *                 type: string
+ *                 format: date-time
+ *               customerCount:
+ *                 type: number
+ *               totalDishPrice:
+ *                 type: number
+ *               totalExtraPrice:
+ *                 type: number
+ *               totalOfferedAmount:
+ *                 type: number
+ *               totalPriceToPay:
+ *                 type: number
+ *               isGroup:
+ *                 type: boolean
+ *                 default: false
+ *                 description: Whether this is a group order
  *     responses:
  *       201:
  *         description: Order created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TableOrderDto'
+ *               type: string
+ *               description: The ID of the created table order
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
 router.post("/", (req: Request, res: Response) => {
-    console.log(`[OrderController/order] Création d'une nouvelle commande pour la table ${req.body.chevaletId}`);
-
-    OrderService.createOrder(req.body)
+    const isGroup: boolean = (req.query.isGroup === 'true') || false;
+    const order: OrderDto = req.body.order;
+    console.log(`[OrderController/order] Création d'une nouvelle commande pour la table ${order.chevaletId}`);
+    OrderService.createOrder(order, isGroup)
         .then(id => {
             console.log(`[OrderController/order] Commande créée avec succès - ID commande table: ${id}`);
             res.status(201).json(id);
@@ -54,14 +92,20 @@ router.post("/", (req: Request, res: Response) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/OrderDto'
+ *             type: object
+ *             required:
+ *               - orderDto
+ *             properties:
+ *               orderDto:
+ *                 $ref: '#/components/schemas/OrderDto'
  *     responses:
  *       200:
- *         description: Order paid successfully
+ *         description: Order payment status
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TableOrderDto'
+ *               type: boolean
+ *               description: True if order was fully paid and billed, false otherwise
  *       422:
  *         description: Unable to process payment
  *         content:
@@ -78,7 +122,6 @@ router.post("/", (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-
 router.post("/pay", (req: Request, res: Response) => {
     const orderDto: OrderDto = req.body.orderDto;
     console.log(`[OrderController/order/pay] Traitement du paiement complet pour la commande ${orderDto._id}`);
@@ -98,29 +141,27 @@ router.post("/pay", (req: Request, res: Response) => {
 
 /**
  * @openapi
- * /order/payment-item/{itemId}:
+ * /order/payment:
  *   post:
  *     summary: Pay part of an order item
  *     tags:
  *       - Order
- *     parameters:
- *       - name: itemId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the order item to pay part of
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - orderDto
+ *               - paymentList
  *             properties:
  *               orderDto:
  *                 $ref: '#/components/schemas/OrderDto'
- *               payment:
- *                 $ref: '#/components/schemas/OrderItemPayment'
+ *               paymentList:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/OrderItemPaymentSaving'
  *     responses:
  *       200:
  *         description: Part of the order item paid successfully

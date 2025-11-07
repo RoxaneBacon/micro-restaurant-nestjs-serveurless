@@ -1,14 +1,8 @@
 import { Router } from "express";
 import groupService from "../service/group.service";
+import { handlePromiseError } from "../../utils/handlePromiseError";
 
 const router = Router();
-
-const mapError = (err: unknown) => {
-  const message = err instanceof Error ? err.message : "Unexpected error";
-  if (/not found/i.test(message)) return { status: 404, body: { error: message } };
-  if (/closed/i.test(message)) return { status: 403, body: { error: message } };
-  return { status: 500, body: { error: "Internal server error" } };
-};
 
 /**
  * @openapi
@@ -84,13 +78,9 @@ router.get("/:code/exists", (req, res) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/:code/table", (req, res) => {
-  try {
-    const tableNumber = groupService.getTableNumber(req.params.code);
-    res.json({ tableNumber });
-  } catch (err) {
-    const { status, body } = mapError(err);
-    res.status(status).json(body);
-  }
+  groupService.getTableNumber(req.params.code)
+    .then(tableNumber => res.json({ tableNumber }))
+    .catch(handlePromiseError(res, "GroupController.getTableNumber"));
 });
 
 /**
@@ -148,13 +138,9 @@ router.put("/:code/customers", (req, res) => {
   if (!Number.isInteger(count) || count <= 0) {
     return res.status(400).json({ error: "count must be a positive integer" });
   }
-  try {
-    groupService.addCustomer(code, count);
-    res.status(204).end();
-  } catch (err) {
-    const { status, body } = mapError(err);
-    res.status(status).json(body);
-  }
+  groupService.addCustomer(code, count)
+    .then(() => res.status(204).end())
+    .catch(handlePromiseError(res, "GroupController.addCustomer"));
 });
 
 /**
@@ -192,13 +178,9 @@ router.put("/:code/customers", (req, res) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.get("/:code/recap", (req, res) => {
-  try {
-    const recap = groupService.getRecap(req.params.code);
-    res.json(recap);
-  } catch (err) {
-    const { status, body } = mapError(err);
-    res.status(status).json(body);
-  }
+  groupService.getRecap(req.params.code)
+    .then(recap => res.json(recap))
+    .catch(handlePromiseError(res, "GroupController.getRecap"));
 });
 
 /**
@@ -232,13 +214,9 @@ router.get("/:code/recap", (req, res) => {
  *         $ref: '#/components/responses/ServerError'
  */
 router.put("/:code/pay", (req, res) => {
-  try {
-    groupService.pay(req.params.code);
-    res.status(204).end();
-  } catch (err) {
-    const { status, body } = mapError(err);
-    res.status(status).json(body);
-  }
+  groupService.pay(req.params.code)
+    .then(() => res.status(204).end())
+    .catch(handlePromiseError(res, "GroupController.pay"));
 });
 
 /**
@@ -277,14 +255,10 @@ router.put("/:code/pay", (req, res) => {
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/:code/dishes", async (req, res) => {
-  try {
-    const dishes = await groupService.getDishList(req.params.code);
-    res.json(dishes);
-  } catch (err) {
-    const { status, body } = mapError(err);
-    res.status(status).json(body);
-  }
+router.get("/:code/dishes", (req, res) => {
+  groupService.getDishList(req.params.code)
+    .then(dishes => res.json(dishes))
+    .catch(handlePromiseError(res, "GroupController.getDishList"));
 });
 
 export default router;
