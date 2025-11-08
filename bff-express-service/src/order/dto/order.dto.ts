@@ -1,6 +1,5 @@
-import {DishDto} from "../../menu/dto/dish.dto";
-import {IngredientDto} from "../../menu/dto/ingredient.dto";
-import {OrderItemPayment} from "./order-item-payment.dto";
+import { DishDto } from '../../menu/dto/dish.dto'
+import { OrderItemPayment } from './order-item-payment.dto'
 
 /**
  * @openapi
@@ -11,7 +10,7 @@ import {OrderItemPayment} from "./order-item-payment.dto";
  *       enum: [OPEN, PAID, READY, CLOSED]
  *       description: "Available statuses for orders"
  */
-export type OrderStatus = "OPEN" | "PAID" | "READY" | "CLOSED";
+export type OrderStatus = 'OPEN' | 'PAID' | 'READY' | 'CLOSED'
 
 /**
  * @openapi
@@ -65,15 +64,19 @@ export interface OrderItemDto {
  *       type: object
  *       required:
  *         - _id
- *         - tableId
+ *         - chevaletId
  *         - status
  *         - items
  *         - openedAt
  *         - customerCount
+ *         - totalDishPrice
+ *         - totalExtraPrice
+ *         - totalOfferedAmount
+ *         - totalPriceToPay
  *       properties:
  *         _id:
  *           type: string
- *         tableId:
+ *         chevaletId:
  *           type: number
  *         status:
  *           $ref: '#/components/schemas/OrderStatus'
@@ -90,13 +93,29 @@ export interface OrderItemDto {
  *           nullable: true
  *         customerCount:
  *           type: number
+ *         totalDishPrice:
+ *           type: number
+ *           description: La somme de tous les plats de la commande
+ *         totalExtraPrice:
+ *           type: number
+ *           description: La somme des prix de tous les extras choisis
+ *         totalOfferedAmount:
+ *           type: number
+ *           description: La somme offerte, utilisable dans le cas d'un menu incluant des plats
+ *         totalPriceToPay:
+ *           type: number
+ *           description: Le prix de la commande = totalDishPrice + totalExtraPrice - totalOfferedAmount
  */
 export interface OrderDto {
-    _id: string;
-    chevaletId: number;
-    status: OrderStatus;
-    items: OrderItemDto[];
-    openedAt: string; // date-time format
-    closedAt?: string | null; // date-time format
-    customerCount: number;
+    _id: string
+    chevaletId: number
+    status: OrderStatus
+    items: OrderItemDto[]
+    openedAt: string // date-time format
+    closedAt?: string | null // date-time format
+    customerCount: number
+    totalDishPrice: number // la somme de tous les plats de la commande
+    totalExtraPrice: number // la somme des prix de tous les extras choisis
+    totalOfferedAmount: number // la somme offerte, utilisable dans le cas d'un menu incluant des plats
+    totalPriceToPay: number // le prix le la commande = totalDishPrice + totalExtraPrice - totalOffered
 }

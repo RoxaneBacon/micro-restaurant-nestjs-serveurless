@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import MenuController from "./menu/controller/menu.controller";
 import OrderController from "./order/controller/order.controller";
+import GroupController from "./group/controller/group.controller";
 import {setupSwagger} from "./shared/config/swagger";
 import {connectDB} from "./shared/config/mongodb";
 import dotenv from "dotenv";
@@ -20,7 +21,8 @@ app.use(bodyParser.json());
 
 // Register controllers
 app.use("/menu", MenuController);
-app.use("/order", OrderController); 
+app.use("/order", OrderController);
+app.use("/group", GroupController);
 
 // Setup Swagger
 setupSwagger(app);

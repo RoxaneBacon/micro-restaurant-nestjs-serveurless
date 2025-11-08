@@ -4,11 +4,11 @@
  *   schemas:
  *     CategoryName:
  *       type: string
- *       enum: [STARTER, MAIN, DESSERT, BEVERAGE]
+ *       enum: [STARTER, MAIN, DESSERT, BEVERAGE, GROUPMENU]
  *       description: "Available categories for dishes"
  */
 
-export type CategoryName = 'STARTER' | 'MAIN' | 'DESSERT' | 'BEVERAGE';
+export type CategoryName = 'STARTER' | 'MAIN' | 'DESSERT' | 'BEVERAGE' | 'GROUPMENU';
 
 /**
  * @openapi

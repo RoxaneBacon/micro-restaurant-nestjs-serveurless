@@ -1,13 +1,18 @@
 import { Response } from "express";
 import axios from "axios";
+import { HttpError } from "../shared/errors/http-error";
 
 /**
  * Centralized promise rejection handler for Express routes using .then()
  */
 export function handlePromiseError(res: Response, context: string) {
     return (error: any) => {
-        // console.error(`[${context}]`, error);
-        if (axios.isAxiosError(error) && error.response) {
+        // Handle custom HTTP errors
+        if (error instanceof HttpError) {
+            res.status(error.statusCode).json({
+                error: error.message,
+            });
+        } else if (axios.isAxiosError(error) && error.response) {
             const { status, data } = error.response;
             res.status(status || 500).json({
                 error: data?.error || "UnknownError",

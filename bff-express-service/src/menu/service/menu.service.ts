@@ -1,15 +1,14 @@
-import {DishDto} from "../dto/dish.dto";
-import {categories} from "../../shared/service/categories.mocks";
-import {allergens} from "../../shared/service/allergens.mocks";
-import dotenv from "dotenv";
-import axios from "axios";
+import { DishDto } from '../dto/dish.dto'
+import { categories } from '../../shared/service/categories.mocks'
+import { allergens } from '../../shared/service/allergens.mocks'
+import dotenv from 'dotenv'
+import axios from 'axios'
 
-dotenv.config();
+dotenv.config()
 
 const API_BASE = process.env.GATEWAY_SERVICE_URL! + process.env.GATEWAY_MENU_SERVICE_URL;
 
 class MenuService {
-
     /**
      * Transforms raw dish data by parsing fullName and preserving the external _id
      * @param dish - The raw dish data from the API
@@ -18,7 +17,23 @@ class MenuService {
      */
     private transformDish(dish: any): DishDto {
         // Get the dish dto that is inside dish.fullName and replace the id inside dish.fullName by the id outside
-        return {...JSON.parse(dish.fullName), _id: dish._id} as DishDto;
+        console.log(`[MenuService] Transforming dish with id: ${dish._id}`)
+        const transformedDish = {
+            ...JSON.parse(dish.fullName),
+            _id: dish._id,
+        } as DishDto
+        transformedDish.extraPrice = 0 // initialiser extraPrice à 0
+        transformedDish.offeredAmount = 0 // initialiser offeredAmount à 0
+        transformedDish.priceToPay =
+            transformedDish.price +
+            transformedDish.extraPrice -
+            transformedDish.offeredAmount
+        console.log(
+            `[MenuService] Dish transformed successfully: ${JSON.stringify(
+                transformedDish
+            )}`
+        )
+        return transformedDish
     }
 
     /**
@@ -67,4 +82,4 @@ class MenuService {
     }
 }
 
-export default new MenuService();
+export default new MenuService()

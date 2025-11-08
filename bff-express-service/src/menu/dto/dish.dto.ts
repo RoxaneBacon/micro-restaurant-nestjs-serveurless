@@ -1,6 +1,6 @@
-import { CategoryDto } from './category.dto';
-import { AllergenDto } from './allergen.dto';
-import { IngredientDto } from './ingredient.dto';
+import { CategoryDto } from './category.dto'
+import { AllergenDto } from './allergen.dto'
+import { IngredientDto } from './ingredient.dto'
 
 /**
  * @openapi
@@ -11,7 +11,7 @@ import { IngredientDto } from './ingredient.dto';
  *       enum: [none, base, extra]
  *       description: "none = retiré, base = normal, extra = supplément"
  */
-export type IngredientQuantityState = "none" | "base" | "extra"; // "none" = retiré, "base" = normal, "extra" = supplément
+export type IngredientQuantityState = 'none' | 'base' | 'extra' // "none" = retiré, "base" = normal, "extra" = supplément
 
 /**
  * @openapi
@@ -32,9 +32,9 @@ export type IngredientQuantityState = "none" | "base" | "extra"; // "none" = ret
  *           $ref: '#/components/schemas/IngredientQuantityState'
  */
 export interface DishItemDto {
-  _id: string;
-  ingredient: IngredientDto;
-  quantity: IngredientQuantityState;
+    _id: string
+    ingredient: IngredientDto
+    quantity: IngredientQuantityState
 }
 
 /**
@@ -67,6 +67,9 @@ export interface DishItemDto {
  *         - price
  *         - allergens
  *         - ingredients
+ *         - extraPrice
+ *         - offeredAmount
+ *         - priceToPay
  *       properties:
  *         _id:
  *           type: string
@@ -81,6 +84,7 @@ export interface DishItemDto {
  *         price:
  *           type: number
  *           format: float
+ *           description: "Prix UNIQUEMENT du plat sans extra ni réduction"
  *         allergens:
  *           type: array
  *           items:
@@ -92,15 +96,30 @@ export interface DishItemDto {
  *         image:
  *           type: string
  *           nullable: true
+ *         extraPrice:
+ *           type: number
+ *           format: float
+ *           description: "Somme des extras ajoutés au plat"
+ *         offeredAmount:
+ *           type: number
+ *           format: float
+ *           description: "Somme offerte (menu incluant des plats)"
+ *         priceToPay:
+ *           type: number
+ *           format: float
+ *           description: "Prix à payer = price + extraPrice - offeredAmount"
  */
 export interface DishDto {
-  _id: string;
-  fullName: string;
-  shortName: string;
-  description: string;
-  category: CategoryDto;
-  price: number;
-  allergens: AllergenDto[];
-  ingredients: DishItemDto[];
-  image?: string | null;
+    _id: string
+    fullName: string
+    shortName: string
+    description: string
+    category: CategoryDto
+    price: number // prix UNIQUEMENT du plat sans extra ni réduction
+    allergens: AllergenDto[]
+    ingredients: DishItemDto[]
+    image?: string | null
+    extraPrice: number // la somme des extra ajouté au plat
+    offeredAmount: number // la somme offerte, utilisable dans le cas d'un menu incluant des plats
+    priceToPay: number // le prix à payer = price + extraPrice - offeredAmount
 }
