@@ -12,6 +12,8 @@ docker-compose -p restaurant-nestjs \
 
 wait_on_health http://localhost:9500 gateway
 
+sleep 5
+
 docker-compose -p restaurant-nestjs \
                --env-file ./.env.docker \
                --file bff-express-service/docker-compose-bff.yml up -d
